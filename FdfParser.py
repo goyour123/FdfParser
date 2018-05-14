@@ -30,9 +30,9 @@ def update_macro_dict(key, val, dict):
             elif (optr == '/'):
                 result /= int(dict[oprd[idx + 1]], base=16)
         val = hex(int(result))
-        dict[key] = val
     else:
-        dict[key] = val
+        pass
+    dict[key] = val
     return dict
 
 def main():
@@ -43,7 +43,7 @@ def main():
     with open(sys.argv[1], 'r') as f:
         for line in f:
             sect = re.findall(r'\[FD\.(.+)\]', line)
-            macro = re.findall(r'DEFINE\s+(\S+)\s+=\s+(.+)[\s#]+', line)
+            macro = re.findall(r'DEFINE\s+?(\S+)\s+=\s+?(\S+)\s*', line)
             if len(fd_list) > 0:
                 region = re.findall(r'([$0].+)\|([$0].+)', line)
                 if len(region) > 0:
@@ -69,6 +69,6 @@ def main():
                 get_region_value(region_offect, macro_dict)
                 get_region_value(region_size, macro_dict)
                 f.writelines(region_offect + '|' + region_size + ' ' + get_region_value(region_offect, macro_dict) + '|' + get_region_value(region_size, macro_dict) +'\n')
-
+            f.writelines('\n')
 if __name__ == '__main__':
     main()
