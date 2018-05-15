@@ -1,4 +1,6 @@
+#project
 .vscode
+*.bat
 
 #generate
 region.txt
