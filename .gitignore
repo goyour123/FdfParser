@@ -3,5 +3,5 @@
 *.bat
 
 #generate
-region.txt
-macro.json
+*.txt
+*.json

@@ -42,7 +42,7 @@ def main():
     with open(sys.argv[1], 'r') as f:
         for line in f:
             sect = re.findall(r'\[FD\.(.+)\]', line)
-            macro = re.findall(r'DEFINE\s+?(\S+)\s*\S', line)
+            macro = re.findall(r'DEFINE\s+([^\s=]+)', line)
             if len(fd_list) > 0:
                 region = re.findall(r'([\$0].+)\|([\$0].+)', line)
                 if len(region) > 0:
