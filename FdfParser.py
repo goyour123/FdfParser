@@ -14,9 +14,9 @@ def get_region_value(val, macro_dict):
     return hex(int(val, base=16))
 
 def update_macro_dict(key, line, dict):
-    oprd = re.findall(r'\s*[\+\-\*/=]\s*([^\+\-\*\/\n\s]+)', line)
+    oprd = re.findall(r'\s*[\+\-\*/=]\s*([^\+\-\*\/\n\s#]+)', line)
     operator = re.findall(r'([\+\-\*/])', line)
-    
+
     result = int(get_region_value(oprd[0], dict), base=16)
 
     if len(operator) > 0:
@@ -38,7 +38,7 @@ def main():
 
     fd_info, fd_list, fd_count = {}, [], 0
     macro_dict = {}
-        
+
     with open(sys.argv[1], 'r') as f:
         for line in f:
             sect = re.findall(r'\[FD\.(.+)\]', line)
