@@ -37,12 +37,15 @@ def update_macro_dict(key, line, dict):
 def main():
 
     fd_info, fd_list, fd_count = {}, [], 0
-    macro_dict = {}
+    macro_dict, config_dict = {}, {}
 
     with open(sys.argv[1], 'r') as f:
         for line in f:
             sect = re.findall(r'\[FD\.(.+)\]', line)
             macro = re.findall(r'DEFINE\s+([^\s=]+)', line)
+            switch = re.findall(r'!if\s+\$\((\S+)\)', line)
+            if len(switch) > 0:
+                config_dict[switch[0]] = 'NO'
             if len(fd_list) > 0:
                 region = re.findall(r'([\$0].+)\|([\$0].+)', line)
                 if len(region) > 0:
