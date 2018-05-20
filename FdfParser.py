@@ -37,7 +37,7 @@ def update_macro_dict(key, line, dict):
 def main():
 
     fd_info, fd_list, fd_count = {}, [], 0
-    macro_dict, config_dict = {}, {}
+    macro_dict = {}
 
     with open(sys.argv[1], 'r') as f:
         for line in f:
@@ -45,7 +45,25 @@ def main():
             macro = re.findall(r'DEFINE\s+([^\s=]+)', line)
             switch = re.findall(r'!if\s+\$\((\S+)\)', line)
             if len(switch) > 0:
-                config_dict[switch[0]] = 'NO'
+                # Save switch conditions to config.json
+                try:
+                    open('config.json', 'r+')
+                except FileNotFoundError:
+                    # If config.json is not existed, create it and set the switch condition to NO
+                    with open('config.json', 'w') as config_f:
+                        config_f.write(json.JSONEncoder().encode({switch[0]: 'NO'}))
+                else:
+                    with open('config.json', 'r+') as config_f:
+                        config_dict = json.load(config_f)
+                        try:
+                            config_dict[switch[0]]
+                        except KeyError:
+                            # If the switch condition is not existed in config.json, add it into config.json and set it to NO
+                            config_dict[switch[0]] = 'NO'
+                            config_f.truncate(0)
+                            config_f.seek(0)
+                            config_f.write(json.JSONEncoder().encode(config_dict))
+
             if len(fd_list) > 0:
                 region = re.findall(r'([\$0].+)\|([\$0].+)', line)
                 if len(region) > 0:
