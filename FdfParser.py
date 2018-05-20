@@ -8,8 +8,6 @@ def get_region_value(val, macro_dict):
     except:
         macro = re.findall(r'\$\((\S*)\)', val)
         val = macro_dict[macro[0]]
-    else:
-        pass
 
     return hex(int(val, base=16))
 
