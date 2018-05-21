@@ -41,23 +41,24 @@ def main():
         for line in f:
             sect = re.findall(r'\[FD\.(.+)\]', line)
             macro = re.findall(r'DEFINE\s+([^\s=]+)', line)
-            switch = re.findall(r'!if\s+\$\((\S+)\)', line)
+            switch = re.findall(r'\s*!if\s+\$\((\S+)\)\s*==\s*(\S+)\s*', line)
             if len(switch) > 0:
+                oprda, oprdb = switch[0]
                 # Save switch conditions to config.json
                 try:
                     open('config.json', 'r+')
                 except FileNotFoundError:
                     # If config.json is not existed, create it and set the switch condition to NO
                     with open('config.json', 'w') as config_f:
-                        config_f.write(json.JSONEncoder().encode({switch[0]: 'NO'}))
+                        config_f.write(json.JSONEncoder().encode({oprda: 'NO'}))
                 else:
                     with open('config.json', 'r+') as config_f:
                         config_dict = json.load(config_f)
                         try:
-                            config_dict[switch[0]]
+                            config_dict[oprda]
                         except KeyError:
                             # If the switch condition is not existed in config.json, add it into config.json and set it to NO
-                            config_dict[switch[0]] = 'NO'
+                            config_dict[oprda] = 'NO'
                             config_f.truncate(0)
                             config_f.seek(0)
                             config_f.write(json.JSONEncoder().encode(config_dict))
@@ -66,10 +67,12 @@ def main():
                 region = re.findall(r'([\$0].+)\|([\$0].+)', line)
                 if len(region) > 0:
                     fd_info[fd_list[fd_count-1]].append(region[0])
+
             if len(sect) > 0:
                 fd_list.append(sect[0])
                 fd_count += 1
                 fd_info[fd_list[fd_count-1]] = []
+
             if len(macro) > 0:
                 # Collect MACROs into a dict
                 macro_dict = update_macro_dict(macro[0], line, macro_dict)
