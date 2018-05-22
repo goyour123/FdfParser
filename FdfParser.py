@@ -39,13 +39,21 @@ def main():
 
     with open(sys.argv[1], 'r') as f:
         for line in f:
+            
+            # Filter the comments
+            if line.split('#')[0] == '':
+                continue
+            else:
+                line = line.split('#')[0]
+
             sect = re.findall(r'\[FD\.(.+)\]', line)
-            macro = re.findall(r'DEFINE\s+([^\s=]+)', line)
+            macro = re.findall(r'\s*DEFINE\s+([^\s=]+)', line)
             switch = re.findall(r'\s*!if\s+\$\((\S+)\)\s*==\s*(\S+)\s*', line)
+
             if len(switch) > 0:
                 oprda, oprdb = switch[0]
                 # Save switch conditions to config.json
-                try:
+                try: 
                     open('config.json', 'r+')
                 except FileNotFoundError:
                     # If config.json is not existed, create it and set the switch condition to NO
