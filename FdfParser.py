@@ -48,28 +48,33 @@ def main():
 
             sect = re.findall(r'\[FD\.(.+)\]', line)
             macro = re.findall(r'\s*DEFINE\s+([^\s=]+)', line)
-            switch = re.findall(r'\s*!if\s+\$\((\S+)\)\s*==\s*(\S+)\s*', line)
+            statement = re.findall(r'\s*!(\S+)\s+', line)
 
-            if len(switch) > 0:
-                oprda, oprdb = switch[0]
-                # Save switch conditions to config.json
-                try: 
-                    open('config.json', 'r+')
-                except FileNotFoundError:
-                    # If config.json is not existed, create it and set the switch condition to NO
-                    with open('config.json', 'w') as config_f:
-                        config_f.write(json.JSONEncoder().encode({oprda: 'NO'}))
-                else:
-                    with open('config.json', 'r+') as config_f:
-                        config_dict = json.load(config_f)
+            if len(statement) > 0:
+                if statement[0] == 'if':
+                    if_stat = re.findall(r'\s*!if\s+\$\((\S+)\)\s*==\s*(\S+)\s*', line)
+
+                    if len(if_stat) > 0:
+                        oprda, oprdb = if_stat[0]
+
+                        # Save switch conditions to config.json
                         try:
-                            config_dict[oprda]
-                        except KeyError:
-                            # If the switch condition is not existed in config.json, add it into config.json and set it to NO
-                            config_dict[oprda] = 'NO'
-                            config_f.truncate(0)
-                            config_f.seek(0)
-                            config_f.write(json.JSONEncoder().encode(config_dict))
+                            open('config.json', 'r+')
+                        except FileNotFoundError:
+                            # If config.json is not existed, create it and set the switch condition to NO
+                            with open('config.json', 'w') as config_f:
+                                config_f.write(json.JSONEncoder().encode({oprda: 'NO'}))
+                        else:
+                            with open('config.json', 'r+') as config_f:
+                                config_dict = json.load(config_f)
+                                try:
+                                    config_dict[oprda]
+                                except KeyError:
+                                    # If the switch condition is not existed in config.json, add it into config.json and set it to NO
+                                    config_dict[oprda] = 'NO'
+                                    config_f.truncate(0)
+                                    config_f.seek(0)
+                                    config_f.write(json.JSONEncoder().encode(config_dict))
 
             if len(fd_list) > 0:
                 region = re.findall(r'([\$0].+)\|([\$0].+)', line)
