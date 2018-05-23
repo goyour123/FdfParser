@@ -13,19 +13,11 @@ def extract_var(string):
     var = re.findall(r'\$\((\S*)\)', string)
     if len(var) > 0:
         return var[0]
+    else:
+        return None
 
 def get_macro_value(macro, macro_dict):
-    try:
-        int(macro, base=16)
-    except:
-        var = extract_var(macro)
-        if var:
-            val = macro_dict[var]
-        else:
-            val = macro_dict[macro]
-    else:
-        val = macro
-
+    val = macro_dict[macro]
     try:
         int(val, base=16)
     except:
@@ -35,28 +27,24 @@ def get_macro_value(macro, macro_dict):
 
     return val
 
+def get_value(var, macro_dict):
+    try:
+        int(var, base=16)
+    except ValueError:
+        return int(get_macro_value(extract_var(var), macro_dict), base=16)
+    else:
+        return int(var, base=16)
+
 def update_macro_dict(key, line, dict):
     oprd = re.findall(r'\s*[\+\-\*/=]\s*([^\+\-\*\/\n\s#]+)', line)
     operator = re.findall(r'([\+\-\*/])', line)
 
     # Set the first operand as the initial result value
-    try:
-        int(oprd[0], base=16)
-    except ValueError:
-        result = int(get_macro_value(extract_var(oprd[0]), dict), base=16)
-    else:
-        result = int(oprd[0], base=16)
+    result = get_value(oprd[0], dict)
 
     if len(operator) > 0:
         for idx, optr in enumerate(operator):
-
-            try:
-                int(oprd[idx + 1], base=16)
-            except ValueError:
-                val = int(get_macro_value(extract_var(oprd[idx + 1]), dict), base=16)
-            else:
-                val = int(oprd[idx + 1], base=16)
-
+            val = get_value(oprd[idx + 1], dict)
             if (optr == '+'):
                 result += val
             elif (optr == '-'):
@@ -136,10 +124,11 @@ def main():
     with open('region.txt', 'w') as f:
         for fd in fd_info:
             f.writelines(fd + ' Offset|Size\n')
-            for region_offect, region_size in fd_info[fd]:
-                if int(get_macro_value(region_size, macro_dict), base=16) == 0:
+            for region_offset, region_size in fd_info[fd]:
+                offset_macro, size_macro = extract_var(region_offset), extract_var(region_size)
+                if int(get_macro_value(offset_macro, macro_dict), base=16) == 0:
                     continue
-                f.writelines(region_offect + '|' + region_size + ' ' + get_macro_value(region_offect, macro_dict) + '|' + get_macro_value(region_size, macro_dict) +'\n')
+                f.writelines(region_offset + '|' + region_size + ' ' + get_macro_value(offset_macro, macro_dict) + '|' + get_macro_value(size_macro, macro_dict) +'\n')
             f.writelines('\n')
 
 if __name__ == '__main__':
