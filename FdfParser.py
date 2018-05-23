@@ -2,24 +2,43 @@ import sys
 import re
 import json
 
-def get_region_value(val, macro_dict):
+def get_cond(oprda, oprdb, optr):
+    if optr == '==':
+        if oprda == oprdb:
+            return True
+        else:
+            return False
+
+def get_macro_value(macro, macro_dict):
+    try:
+        int(macro, base=16)
+    except:
+        var = re.findall(r'\$\((\S*)\)', macro)
+        if len(var) > 0:
+            val = macro_dict[var[0]]
+        else:
+            val = macro_dict[macro]
+    else:
+        val = macro
+
     try:
         int(val, base=16)
     except:
-        macro = re.findall(r'\$\((\S*)\)', val)
-        val = macro_dict[macro[0]]
+        pass
+    else:
+        val = hex(int(val, base=16))
 
-    return hex(int(val, base=16))
+    return val
 
 def update_macro_dict(key, line, dict):
     oprd = re.findall(r'\s*[\+\-\*/=]\s*([^\+\-\*\/\n\s#]+)', line)
     operator = re.findall(r'([\+\-\*/])', line)
 
-    result = int(get_region_value(oprd[0], dict), base=16)
+    result = int(get_macro_value(oprd[0], dict), base=16)
 
     if len(operator) > 0:
         for idx, optr in enumerate(operator):
-            val = int(get_region_value(oprd[idx + 1], dict), base=16)
+            val = int(get_macro_value(oprd[idx + 1], dict), base=16)
             if (optr == '+'):
                 result += val
             elif (optr == '-'):
@@ -100,9 +119,9 @@ def main():
         for fd in fd_info:
             f.writelines(fd + ' Offset|Size\n')
             for region_offect, region_size in fd_info[fd]:
-                if int(get_region_value(region_size, macro_dict), base=16) == 0:
+                if int(get_macro_value(region_size, macro_dict), base=16) == 0:
                     continue
-                f.writelines(region_offect + '|' + region_size + ' ' + get_region_value(region_offect, macro_dict) + '|' + get_region_value(region_size, macro_dict) +'\n')
+                f.writelines(region_offect + '|' + region_size + ' ' + get_macro_value(region_offect, macro_dict) + '|' + get_macro_value(region_size, macro_dict) +'\n')
             f.writelines('\n')
 
 if __name__ == '__main__':
