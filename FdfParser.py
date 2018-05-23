@@ -9,13 +9,18 @@ def get_cond(oprda, oprdb, optr):
         else:
             return False
 
+def extract_var(string):
+    var = re.findall(r'\$\((\S*)\)', string)
+    if len(var) > 0:
+        return var[0]
+
 def get_macro_value(macro, macro_dict):
     try:
         int(macro, base=16)
     except:
-        var = re.findall(r'\$\((\S*)\)', macro)
-        if len(var) > 0:
-            val = macro_dict[var[0]]
+        var = extract_var(macro)
+        if var:
+            val = macro_dict[var]
         else:
             val = macro_dict[macro]
     else:
@@ -34,11 +39,24 @@ def update_macro_dict(key, line, dict):
     oprd = re.findall(r'\s*[\+\-\*/=]\s*([^\+\-\*\/\n\s#]+)', line)
     operator = re.findall(r'([\+\-\*/])', line)
 
-    result = int(get_macro_value(oprd[0], dict), base=16)
+    # Set the first operand as the initial result value
+    try:
+        int(oprd[0], base=16)
+    except ValueError:
+        result = int(get_macro_value(extract_var(oprd[0]), dict), base=16)
+    else:
+        result = int(oprd[0], base=16)
 
     if len(operator) > 0:
         for idx, optr in enumerate(operator):
-            val = int(get_macro_value(oprd[idx + 1], dict), base=16)
+
+            try:
+                int(oprd[idx + 1], base=16)
+            except ValueError:
+                val = int(get_macro_value(extract_var(oprd[idx + 1]), dict), base=16)
+            else:
+                val = int(oprd[idx + 1], base=16)
+
             if (optr == '+'):
                 result += val
             elif (optr == '-'):
