@@ -63,6 +63,9 @@ def main():
     macro_dict = {}
 
     with open(sys.argv[1], 'r') as f:
+
+        cond_match_flag = True
+
         for line in f:
             
             # Filter the comments
@@ -88,7 +91,8 @@ def main():
                         except FileNotFoundError:
                             # If config.json is not existed, create it and set the switch condition to NO
                             with open('config.json', 'w') as config_f:
-                                config_f.write(json.JSONEncoder().encode({oprda: 'NO'}))
+                                config_dict = {oprda: 'NO'}
+                                config_f.write(json.JSONEncoder().encode(config_dict))
                         else:
                             with open('config.json', 'r+') as config_f:
                                 config_dict = json.load(config_f)
@@ -100,6 +104,16 @@ def main():
                                     config_f.truncate(0)
                                     config_f.seek(0)
                                     config_f.write(json.JSONEncoder().encode(config_dict))
+
+                    cond_match_flag = get_cond(get_macro_value(oprda, config_dict), oprdb, '==')
+                elif statement[0] == 'else':
+                    cond_match_flag = not cond_match_flag
+                elif statement[0] == 'endif':
+                    cond_match_flag = True
+
+            # Skip parsing if the condition is not match
+            if not cond_match_flag:
+                continue
 
             if len(fd_list) > 0:
                 region = re.findall(r'([\$0].+)\|([\$0].+)', line)
