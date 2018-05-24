@@ -126,7 +126,7 @@ def main():
             f.writelines(fd + ' Offset|Size\n')
             for region_offset, region_size in fd_info[fd]:
                 offset_macro, size_macro = extract_var(region_offset), extract_var(region_size)
-                if int(get_macro_value(offset_macro, macro_dict), base=16) == 0:
+                if int(get_macro_value(size_macro, macro_dict), base=16) == 0:
                     continue
                 f.writelines(region_offset + '|' + region_size + ' ' + get_macro_value(offset_macro, macro_dict) + '|' + get_macro_value(size_macro, macro_dict) +'\n')
             f.writelines('\n')
