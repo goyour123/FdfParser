@@ -65,6 +65,7 @@ def main():
     with open(sys.argv[1], 'r') as f:
 
         cond_match_flag = True
+        fd_cond, fv_cond = False, False
 
         for line in f:
             
@@ -74,9 +75,25 @@ def main():
             else:
                 line = line.split('#')[0]
 
-            sect = re.findall(r'\[FD\.(.+)\]', line)
+            sect = re.findall(r'\[(\S+)\.(\S+)\]', line)
             macro = re.findall(r'\s*DEFINE\s+([^\s=]+)', line)
             statement = re.findall(r'\s*!(\S+)\s+', line)
+
+            # Check what section is under parsing
+            if len(sect) > 0:
+                sect_type, name = sect[0]
+                if (sect_type == 'FD'):
+                    fd_cond, fv_cond= True, False
+                    fd_list.append(name)
+                    fd_count += 1
+                    fd_info[fd_list[fd_count-1]] = []
+                elif (sect_type == 'FV'):
+                    fd_cond, fv_cond = False, True
+                else:
+                    fd_cond, fv_cond = False, False
+
+            if fv_cond:
+                continue
 
             if len(statement) > 0:
                 if statement[0] == 'if':
@@ -115,15 +132,10 @@ def main():
             if not cond_match_flag:
                 continue
 
-            if len(fd_list) > 0:
+            if fd_cond > 0:
                 region = re.findall(r'([\$0].+)\|([\$0].+)', line)
                 if len(region) > 0:
                     fd_info[fd_list[fd_count-1]].append(region[0])
-
-            if len(sect) > 0:
-                fd_list.append(sect[0])
-                fd_count += 1
-                fd_info[fd_list[fd_count-1]] = []
 
             if len(macro) > 0:
                 # Collect MACROs into a dict
