@@ -64,7 +64,7 @@ def main():
 
     with open(sys.argv[1], 'r') as f:
 
-        cond_match_flag = True
+        cond_nest = []
         fd_cond, fv_cond = False, False
 
         for line in f:
@@ -122,14 +122,14 @@ def main():
                                     config_f.seek(0)
                                     config_f.write(json.JSONEncoder().encode(config_dict))
 
-                    cond_match_flag = get_cond(get_macro_value(oprda, config_dict), oprdb, '==')
+                    cond_nest.append(get_cond(get_macro_value(oprda, config_dict), oprdb, '=='))
                 elif statement[0] == 'else':
-                    cond_match_flag = not cond_match_flag
+                    cond_nest[-1] = not cond_nest[-1]
                 elif statement[0] == 'endif':
-                    cond_match_flag = True
+                    cond_nest.pop(-1)
 
             # Skip parsing if the condition is not match
-            if not cond_match_flag:
+            if False in cond_nest:
                 continue
 
             if fd_cond > 0:
