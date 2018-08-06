@@ -109,7 +109,7 @@ def main():
                             # If config.json is not existed, create it and set the switch condition to NO
                             with open('config.json', 'w') as config_f:
                                 config_dict = {oprda: 'NO'}
-                                config_f.write(json.JSONEncoder().encode(config_dict))
+                                config_f.write(json.dumps(config_dict, indent=4))
                         else:
                             with open('config.json', 'r+') as config_f:
                                 config_dict = json.load(config_f)
@@ -120,7 +120,7 @@ def main():
                                     config_dict[oprda] = 'NO'
                                     config_f.truncate(0)
                                     config_f.seek(0)
-                                    config_f.write(json.JSONEncoder().encode(config_dict))
+                                    config_f.write(json.dumps(config_dict, indent=4))
 
                     cond_nest.append(get_cond(get_macro_value(oprda, config_dict), oprdb, '=='))
                 elif statement[0] == 'else':
@@ -142,7 +142,7 @@ def main():
                 macro_dict = update_macro_dict(macro[0], line, macro_dict)
 
     # Output the MACRO dict as a JSON file
-    macro_json = json.JSONEncoder().encode(macro_dict)
+    macro_json = json.dumps(macro_dict, indent=4)
     with open('macro.json', 'w') as f:
         f.write(macro_json)
 
