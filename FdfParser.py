@@ -108,21 +108,21 @@ def main():
                         except FileNotFoundError:
                             # If config.json is not existed, create it and set the switch condition to NO
                             with open('config.json', 'w') as config_f:
-                                config_dict = {oprda: 'NO'}
+                                config_dict = {'Switch': {oprda: 'NO'}}
                                 config_f.write(json.dumps(config_dict, indent=4))
                         else:
                             with open('config.json', 'r+') as config_f:
                                 config_dict = json.load(config_f)
                                 try:
-                                    config_dict[oprda]
+                                    config_dict['Switch'][oprda]
                                 except KeyError:
                                     # If the switch condition is not existed in config.json, add it into config.json and set it to NO
-                                    config_dict[oprda] = 'NO'
+                                    config_dict['Switch'][oprda] = 'NO'
                                     config_f.truncate(0)
                                     config_f.seek(0)
                                     config_f.write(json.dumps(config_dict, indent=4))
 
-                    cond_nest.append(get_cond(get_macro_value(oprda, config_dict), oprdb, '=='))
+                    cond_nest.append(get_cond(get_macro_value(oprda, config_dict['Switch']), oprdb, '=='))
                 elif statement[0] == 'else':
                     cond_nest[-1] = not cond_nest[-1]
                 elif statement[0] == 'endif':
