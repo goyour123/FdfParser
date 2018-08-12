@@ -1,6 +1,5 @@
-import sys
-import re
-import json
+import sys, os
+import re, json
 
 def get_cond(oprda, oprdb, optr):
     if optr == '==':
@@ -59,10 +58,27 @@ def update_macro_dict(key, line, dict):
 
 def main():
 
+    try:
+        sys.argv[1]
+    except IndexError:
+        if os.path.isfile('config.json'):
+            with open('config.json', 'r') as config_f:
+                config_dict = json.load(config_f)
+                try:
+                    config_dict['Fdf']
+                except KeyError:
+                    sys.exit()
+                else:
+                    parsingFilePath = config_dict['Fdf']
+        else:
+            sys.exit()
+    else:
+        parsingFilePath = sys.argv[1]
+
     fd_info, fd_list, fd_count = {}, [], 0
     macro_dict = {}
 
-    with open(sys.argv[1], 'r') as f:
+    with open(parsingFilePath, 'r') as f:
 
         cond_nest = []
         fd_cond, fv_cond = False, False
@@ -145,6 +161,14 @@ def main():
     macro_json = json.dumps(macro_dict, indent=4)
     with open('macro.json', 'w') as f:
         f.write(macro_json)
+
+    # Save parsingFilePath into config.json
+    with open('config.json', 'r+') as f:
+        config_dict = json.load(f)
+        config_dict.update({'Fdf': parsingFilePath})
+        f.truncate(0)
+        f.seek(0)
+        f.write(json.dumps(config_dict, indent=4))
 
     # Create Region file
     with open('region.txt', 'w') as f:
