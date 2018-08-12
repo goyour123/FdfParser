@@ -172,6 +172,7 @@ def main():
 
     # Create Region file
     with open('region.txt', 'w') as f:
+        f.writelines('----------------\nParsed File Path: ' + parsingFilePath + '\n----------------\n\n')
         for fd in fd_info:
             f.writelines(fd + ' Offset|Size\n')
             for region_offset, region_size in fd_info[fd]:
