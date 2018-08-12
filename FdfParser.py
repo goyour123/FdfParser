@@ -56,24 +56,7 @@ def update_macro_dict(key, line, dict):
     dict[key] = hex(int(result))
     return dict
 
-def main():
-
-    try:
-        sys.argv[1]
-    except IndexError:
-        if os.path.isfile('config.json'):
-            with open('config.json', 'r') as config_f:
-                config_dict = json.load(config_f)
-                try:
-                    config_dict['Fdf']
-                except KeyError:
-                    sys.exit()
-                else:
-                    parsingFilePath = config_dict['Fdf']
-        else:
-            sys.exit()
-    else:
-        parsingFilePath = sys.argv[1]
+def parse(parsingFilePath=None):
 
     fd_info, fd_list, fd_count = {}, [], 0
     macro_dict = {}
@@ -183,4 +166,22 @@ def main():
             f.writelines('\n')
 
 if __name__ == '__main__':
-    main()
+
+    try:
+        sys.argv[1]
+    except IndexError:
+        if os.path.isfile('config.json'):
+            with open('config.json', 'r') as config_f:
+                config_dict = json.load(config_f)
+                try:
+                    config_dict['Fdf']
+                except KeyError:
+                    sys.exit()
+                else:
+                    fdfPath = config_dict['Fdf']
+        else:
+            sys.exit()
+    else:
+        fdfPath = sys.argv[1]
+
+    parse(parsingFilePath=fdfPath)
