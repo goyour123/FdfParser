@@ -118,9 +118,8 @@ def parse(parsingFilePath=None):
                             open('config.json', 'r+')
                         except FileNotFoundError:
                             # If config.json is not existed, create it and set the switch condition to NO
-                            with open('config.json', 'w') as config_f:
-                                config_dict = {'Switch': {oprda: 'NO'}}
-                                config_f.write(json.dumps(config_dict, indent=4))
+                            config_dict = {'Switch': {oprda: 'NO'}}
+                            dictUpdateJson('config.json', config_dict)
                         else:
                             with open('config.json', 'r+') as config_f:
                                 config_dict = json.load(config_f)
@@ -152,20 +151,7 @@ def parse(parsingFilePath=None):
                 # Collect MACROs into a dict
                 macro_dict = update_macro_dict(macro[0], line, macro_dict)
 
-    # Output the MACRO dict as a JSON file
-    dictUpdateJson('macro.json', macro_dict)
-
-    # Create Region file
-    with open('region.txt', 'w') as f:
-        f.writelines('----------------\nParsed File Path: ' + parsingFilePath + '\n----------------\n\n')
-        for fd in fd_info:
-            f.writelines(fd + ' Offset|Size\n')
-            for region_offset, region_size in fd_info[fd]:
-                offset_macro, size_macro = extract_var(region_offset), extract_var(region_size)
-                if int(get_macro_value(size_macro, macro_dict), base=16) == 0:
-                    continue
-                f.writelines(region_offset + '|' + region_size + ' ' + get_macro_value(offset_macro, macro_dict) + '|' + get_macro_value(size_macro, macro_dict) +'\n')
-            f.writelines('\n')
+    return fd_info, macro_dict
 
 if __name__ == '__main__':
     try:
@@ -185,7 +171,22 @@ if __name__ == '__main__':
     else:
         fdfPath = sys.argv[1]
 
-    parse(parsingFilePath=fdfPath)
+    fd_dict, macro_dict = parse(parsingFilePath=fdfPath)
+
+    # Output the MACRO dict as a JSON file
+    # dictUpdateJson('macro.json', macro_dict)
 
     # Save parsingFilePath into config.json
     dictUpdateJson('config.json', {'Fdf': fdfPath})
+
+    # Create Region file
+    with open('region.txt', 'w') as f:
+        f.writelines('----------------\nParsed File Path: ' + fdfPath + '\n----------------\n\n')
+        for fd in fd_dict:
+            f.writelines(fd + ' Offset|Size\n')
+            for region_offset, region_size in fd_dict[fd]:
+                offset_macro, size_macro = extract_var(region_offset), extract_var(region_size)
+                if int(get_macro_value(size_macro, macro_dict), base=16) == 0:
+                    continue
+                f.writelines(region_offset + '|' + region_size + ' ' + get_macro_value(offset_macro, macro_dict) + '|' + get_macro_value(size_macro, macro_dict) +'\n')
+            f.writelines('\n')
