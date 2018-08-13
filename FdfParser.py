@@ -68,7 +68,7 @@ def dictUpdateJson(jsonFilePath, dictUpdate):
         with open (jsonFilePath, 'w') as j:
             j.write(json.dumps(dictUpdate, indent = 4))
 
-def parse(parsingFilePath=None):
+def parse(parsingFilePath, config_dict):
 
     fd_info, fd_list, fd_count = {}, [], 0
     macro_dict = {}
@@ -79,7 +79,7 @@ def parse(parsingFilePath=None):
         fd_cond, fv_cond = False, False
 
         for line in f:
-            
+
             # Filter the comments
             if line.split('#')[0] == '':
                 continue
@@ -112,25 +112,14 @@ def parse(parsingFilePath=None):
 
                     if len(if_stat) > 0:
                         oprda, oprdb = if_stat[0]
-
-                        # Save switch conditions to config.json
                         try:
-                            open('config.json', 'r+')
-                        except FileNotFoundError:
-                            # If config.json is not existed, create it and set the switch condition to NO
-                            config_dict = {'Switch': {oprda: 'NO'}}
-                            dictUpdateJson('config.json', config_dict)
-                        else:
-                            with open('config.json', 'r+') as config_f:
-                                config_dict = json.load(config_f)
-                                try:
-                                    config_dict['Switch'][oprda]
-                                except KeyError:
-                                    # If the switch condition is not existed in config.json, add it into config.json and set it to NO
-                                    config_dict['Switch'][oprda] = 'NO'
-                                    config_f.truncate(0)
-                                    config_f.seek(0)
-                                    config_f.write(json.dumps(config_dict, indent=4))
+                            config_dict['Switch'][oprda]
+                        except KeyError:
+                            # If the switch condition is not existed in config_dict, add and set it to NO
+                            if 'Switch' not in config_dict:
+                                config_dict = {'Switch': {oprda: 'NO'}}
+                            else:
+                                config_dict['Switch'][oprda] = 'NO'
 
                     cond_nest.append(get_cond(get_macro_value(oprda, config_dict['Switch']), oprdb, '=='))
                 elif statement[0] == 'else':
@@ -151,7 +140,7 @@ def parse(parsingFilePath=None):
                 # Collect MACROs into a dict
                 macro_dict = update_macro_dict(macro[0], line, macro_dict)
 
-    return fd_info, macro_dict
+    return fd_info, macro_dict, config_dict
 
 if __name__ == '__main__':
     try:
@@ -169,14 +158,20 @@ if __name__ == '__main__':
         else:
             sys.exit()
     else:
+        if os.path.isfile('config.json'):
+            with open('config.json', 'r') as config_f:
+                config_dict = json.load(config_f)
+        else:
+            config_dict = {}
         fdfPath = sys.argv[1]
 
-    fd_dict, macro_dict = parse(parsingFilePath=fdfPath)
+    fd_dict, macro_dict, config_dict = parse(fdfPath, config_dict)
 
     # Output the MACRO dict as a JSON file
     # dictUpdateJson('macro.json', macro_dict)
 
-    # Save parsingFilePath into config.json
+    # Save config_dict into config.json
+    dictUpdateJson('config.json', config_dict)
     dictUpdateJson('config.json', {'Fdf': fdfPath})
 
     # Create Region file
