@@ -56,6 +56,17 @@ def update_macro_dict(key, line, dict):
     dict[key] = hex(int(result))
     return dict
 
+def dictUpdateJson(jsonFilePath, dictUpdate):
+    if os.path.isfile(jsonFilePath):
+        with open (jsonFilePath, 'r+') as j:
+            jDict = json.load(j).update(dictUpdate)
+            j.truncate(0)
+            j.seek(0)
+            j.write(json.dumps(jDict, indent = 4))
+    else:
+        with open (jsonFilePath, 'w') as j:
+            j.write(json.dumps(dictUpdate, indent = 4))
+
 def parse(parsingFilePath=None):
 
     fd_info, fd_list, fd_count = {}, [], 0
@@ -141,17 +152,10 @@ def parse(parsingFilePath=None):
                 macro_dict = update_macro_dict(macro[0], line, macro_dict)
 
     # Output the MACRO dict as a JSON file
-    macro_json = json.dumps(macro_dict, indent=4)
-    with open('macro.json', 'w') as f:
-        f.write(macro_json)
+    dictUpdateJson('macro.json', macro_dict)
 
     # Save parsingFilePath into config.json
-    with open('config.json', 'r+') as f:
-        config_dict = json.load(f)
-        config_dict.update({'Fdf': parsingFilePath})
-        f.truncate(0)
-        f.seek(0)
-        f.write(json.dumps(config_dict, indent=4))
+    dictUpdateJson('config.json', config_dict)
 
     # Create Region file
     with open('region.txt', 'w') as f:
@@ -166,7 +170,6 @@ def parse(parsingFilePath=None):
             f.writelines('\n')
 
 if __name__ == '__main__':
-
     try:
         sys.argv[1]
     except IndexError:
