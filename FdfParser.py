@@ -59,7 +59,8 @@ def update_macro_dict(key, line, dict):
 def dictUpdateJson(jsonFilePath, dictUpdate):
     if os.path.isfile(jsonFilePath):
         with open (jsonFilePath, 'r+') as j:
-            jDict = json.load(j).update(dictUpdate)
+            jDict = json.load(j)
+            jDict.update(dictUpdate)
             j.truncate(0)
             j.seek(0)
             j.write(json.dumps(jDict, indent = 4))
@@ -154,9 +155,6 @@ def parse(parsingFilePath=None):
     # Output the MACRO dict as a JSON file
     dictUpdateJson('macro.json', macro_dict)
 
-    # Save parsingFilePath into config.json
-    dictUpdateJson('config.json', config_dict)
-
     # Create Region file
     with open('region.txt', 'w') as f:
         f.writelines('----------------\nParsed File Path: ' + parsingFilePath + '\n----------------\n\n')
@@ -188,3 +186,6 @@ if __name__ == '__main__':
         fdfPath = sys.argv[1]
 
     parse(parsingFilePath=fdfPath)
+
+    # Save parsingFilePath into config.json
+    dictUpdateJson('config.json', {'Fdf': fdfPath})
