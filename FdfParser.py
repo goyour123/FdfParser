@@ -68,12 +68,12 @@ def dictUpdateJson(jsonFilePath, dictUpdate):
         with open (jsonFilePath, 'w') as j:
             j.write(json.dumps(dictUpdate, indent = 4))
 
-def parse(parsingFilePath, config_dict):
+def parse(config_dict):
 
     fd_info, fd_list, fd_count = {}, [], 0
     macro_dict = {}
 
-    with open(parsingFilePath, 'r') as f:
+    with open(config_dict['Fdf'], 'r') as f:
 
         cond_nest = []
         fd_cond, fv_cond = False, False
@@ -117,7 +117,7 @@ def parse(parsingFilePath, config_dict):
                         except KeyError:
                             # If the switch condition is not existed in config_dict, add and set it to NO
                             if 'Switch' not in config_dict:
-                                config_dict = {'Switch': {oprda: 'NO'}}
+                                config_dict.update({'Switch': {oprda: 'NO'}})
                             else:
                                 config_dict['Switch'][oprda] = 'NO'
 
@@ -161,22 +161,21 @@ if __name__ == '__main__':
         if os.path.isfile('config.json'):
             with open('config.json', 'r') as config_f:
                 config_dict = json.load(config_f)
+                config_dict.update({'Fdf': sys.argv[1]})
         else:
-            config_dict = {}
-        fdfPath = sys.argv[1]
+            config_dict = {'Fdf': sys.argv[1]}
 
-    fd_dict, macro_dict, config_dict = parse(fdfPath, config_dict)
+    fd_dict, macro_dict, config_dict = parse(config_dict)
 
     # Output the MACRO dict as a JSON file
     # dictUpdateJson('macro.json', macro_dict)
 
     # Save config_dict into config.json
     dictUpdateJson('config.json', config_dict)
-    dictUpdateJson('config.json', {'Fdf': fdfPath})
 
     # Create Region file
     with open('region.txt', 'w') as f:
-        f.writelines('----------------\nParsed File Path: ' + fdfPath + '\n----------------\n\n')
+        f.writelines('----------------\nParsed File Path: ' + config_dict['Fdf'] + '\n----------------\n\n')
         for fd in fd_dict:
             f.writelines(fd + ' Offset|Size\n')
             for region_offset, region_size in fd_dict[fd]:
