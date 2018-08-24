@@ -1,7 +1,12 @@
-#project
-.vscode
-*.bat
+# Byte-compiled / optimized / DLL files
+__pycache__/
 
-#generate
-*.txt
-*.json
+# Editor specific
+.vscode/*
+
+# Output files
+region.txt
+config.json
+
+# User-specific files
+*.bat
