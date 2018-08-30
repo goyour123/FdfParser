@@ -47,10 +47,13 @@ class MainGui:
         self.rt.geometry("600x650+300+50")
 
     def browser(self):
-        initDir = os.getcwd()
+        if 'Fdf' in self.cfgDict:
+            initDir = os.path.dirname(self.cfgDict['Fdf'])
+        else:
+            initDir = os.getcwd()
         loadCfgFile = tkinter.filedialog.askopenfile(title='Browse source path', initialdir=initDir, filetypes=[("fdf", "*.fdf")])
         if loadCfgFile:
-            self.cfgDict['Fdf'] = loadCfgFile.name
+            self.cfgDict.update({'Fdf': loadCfgFile.name})
             self.fdDict, self.macroDict, self.cfgDict = parse(self.cfgDict)
             self.cr8FdListbox()
             self.loadCfgFile = loadCfgFile
