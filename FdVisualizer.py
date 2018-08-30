@@ -15,6 +15,9 @@ def getJsnKey(jsnPath, key):
     except:
         return None
 
+def setDisplayHex(h):
+    return '0x' + ((h[2:].zfill(6))[0:2] + '_' + (h[2:].zfill(6))[2:6]).upper()
+
 class MainGui:
     def __init__(self, rt, cfgDict):
         self.fdDict, self.macroDict, self.cfgDict = parse(cfgDict)
@@ -40,7 +43,7 @@ class MainGui:
 
     def gui_interface_init(self):
         self.rt.title('FdVisualizer')
-        self.rt.geometry("600x600+300+50")
+        self.rt.geometry("600x650+300+50")
 
     def browser(self):
         initDir = os.getcwd()
@@ -65,7 +68,7 @@ class MainGui:
 
     def buildFlashMap(self):
         fdOffset, nulBlk= 0, 0
-        
+
         for w in self.flashFrame.winfo_children():
             w.destroy()
 
@@ -73,12 +76,12 @@ class MainGui:
             rgnOffset, rgnSize = get_value(rgn[0], self.macroDict), get_value(rgn[1], self.macroDict)
             if fdOffset < rgnOffset:
                 tkinter.Label(self.flashFrame, text="", relief='ridge', bg='gray'+ str(6 + ((idx + nulBlk) % 2) * 2) +'1', bd=2, width=50).grid(row=idx + nulBlk + 2, column=0, rowspan=2, columnspan=1, padx=15)
-                tkinter.Label(self.flashFrame, text=hex(fdOffset)).grid(row=idx + nulBlk + 2, column=2, rowspan=1, columnspan=1, sticky='w')
+                tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset))).grid(row=idx + nulBlk + 2, column=2, rowspan=1, columnspan=1, sticky='w')
                 nulBlk += 1
             tkinter.Label(self.flashFrame, text=cnvRgnName(rgn[0]), relief='ridge', bg='gray'+ str(6 + ((idx + nulBlk) % 2) * 2) +'1', bd=2, width=50).grid(row=idx + nulBlk + 2, column=0, rowspan=2, columnspan=1, padx=15)
-            tkinter.Label(self.flashFrame, text=hex(rgnOffset)).grid(row=idx + nulBlk + 2, column=2, rowspan=1, columnspan=1, sticky='w')
+            tkinter.Label(self.flashFrame, text=setDisplayHex(hex(rgnOffset))).grid(row=idx + nulBlk + 2, column=2, rowspan=1, columnspan=1, sticky='w')
             fdOffset = rgnOffset + rgnSize
-        tkinter.Label(self.flashFrame, text=hex(fdOffset)).grid(row=idx + nulBlk + 2 + 1, column=2, rowspan=1, columnspan=1, sticky='w')
+        tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset))).grid(row=idx + nulBlk + 2 + 1, column=2, rowspan=1, columnspan=1, sticky='w')
 
 def main():
 
