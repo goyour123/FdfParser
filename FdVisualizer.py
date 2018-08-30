@@ -20,8 +20,9 @@ def setDisplayHex(h):
 
 class MainGui:
     def __init__(self, rt, cfgDict):
-        self.fdDict, self.macroDict, self.cfgDict = parse(cfgDict)
+
         self.rt = rt
+        self.cfgDict = cfgDict
         self.loadCfgFile = None
         self.gui_interface_init()
 
@@ -38,13 +39,15 @@ class MainGui:
         # Listbox for each FD
         self.fdListbox = tkinter.Listbox(self.rt, height=MAX_FD_NUM, selectmode=tkinter.SINGLE)
         self.curFd = None
-        self.cr8FdListbox()
 
-        self.buildFlashMap()
+        if 'Fdf' in cfgDict:
+            self.fdDict, self.macroDict, self.cfgDict = parse(self.cfgDict)
+            self.cr8FdListbox()
+            self.buildFlashMap()
 
     def gui_interface_init(self):
         self.rt.title('FdVisualizer')
-        self.rt.geometry("600x650+300+50")
+        self.rt.geometry("600x650+350+80")
 
     def browser(self):
         if 'Fdf' in self.cfgDict:
@@ -92,8 +95,11 @@ class MainGui:
 
 def main():
 
-    with open('config.json', 'r') as f:
-        cfgDict = json.load(f)
+    try:
+        with open('config.json', 'r') as f:
+            cfgDict = json.load(f)
+    except:
+        cfgDict = {}
 
     root = tkinter.Tk()
     app = MainGui(root, cfgDict)
