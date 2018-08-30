@@ -1,6 +1,6 @@
 import re, os, sys, json
 import tkinter, tkinter.filedialog
-from FdfParser import parse, get_value
+from FdfParser import parse, get_value, dictUpdateJson
 
 MAX_FD_NUM = 3
 
@@ -22,6 +22,7 @@ class MainGui:
     def __init__(self, rt, cfgDict):
         self.fdDict, self.macroDict, self.cfgDict = parse(cfgDict)
         self.rt = rt
+        self.loadCfgFile = None
         self.gui_interface_init()
 
         # Menubar
@@ -47,9 +48,12 @@ class MainGui:
 
     def browser(self):
         initDir = os.getcwd()
-        filePath = tkinter.filedialog.askopenfile(title='Browse source path', initialdir=initDir)
-        if filePath:
-            self.fdfPath = filePath
+        loadCfgFile = tkinter.filedialog.askopenfile(title='Browse source path', initialdir=initDir, filetypes=[("fdf", "*.fdf")])
+        if loadCfgFile:
+            self.cfgDict['Fdf'] = loadCfgFile.name
+            self.fdDict, self.macroDict, self.cfgDict = parse(self.cfgDict)
+            self.cr8FdListbox()
+            self.loadCfgFile = loadCfgFile
 
     def onSelect(self, evt):
         selFd = self.fdListbox.get(self.fdListbox.curselection()[0])
@@ -91,6 +95,9 @@ def main():
     root = tkinter.Tk()
     app = MainGui(root, cfgDict)
     root.mainloop()
+
+    if app.loadCfgFile:
+        dictUpdateJson('config.json', app.cfgDict)
 
 if __name__ == '__main__':
     main()
