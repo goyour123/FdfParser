@@ -5,7 +5,7 @@ from FdfParser import parse, get_value, dictUpdateJson
 MAX_FD_NUM = 3
 
 def cnvRgnName(RgnDef):
-    return re.search(r'FLASH_REGION_(.+)_[A-Z]+', RgnDef).group(1)
+    return re.search(r'[FLASH]+_REGION_(.+)_[A-Z]+', RgnDef).group(1)
 
 def getJsnKey(jsnPath, key):
     try:
