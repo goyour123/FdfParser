@@ -74,7 +74,8 @@ class MainGui:
         self.fdListbox.grid(row=0, column=0, rowspan=1, columnspan=1, sticky='w', padx=15, pady=5)
         self.fdListbox.bind('<<ListboxSelect>>', self.onSelect)
         self.fdListbox.selection_set(0, None)
-        self.fdListbox.event_generate('<<ListboxSelect>>')
+        self.curFd = self.fdListbox.selection_get()
+        self.buildFlashMap()
 
     def buildFlashMap(self):
         fdOffset, nulBlk= 0, 0
