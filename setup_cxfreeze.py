@@ -12,7 +12,7 @@ if sys.platform == 'win32':
 
 options = {
     'build_exe': {
-        'include_files': [python3_path + r'\DLLs\tk86t.dll', python3_path + r'\DLLs\tcl86t.dll']
+        'include_files': [python3_path + r'\DLLs\tk86t.dll', python3_path + r'\DLLs\tcl86t.dll', '.\\trilobite.ico']
     }
 }
 
