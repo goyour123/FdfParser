@@ -7,6 +7,3 @@ __pycache__/
 # Output files
 region.txt
 config.json
-
-# User-specific files
-*.bat
