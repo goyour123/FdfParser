@@ -12,17 +12,17 @@ if sys.platform == 'win32':
 
 options = {
     'build_exe': {
-        'include_files': [python3_path + r'\DLLs\tk86t.dll', python3_path + r'\DLLs\tcl86t.dll', '.\\trilobite.ico']
+        'include_files': [python3_path + r'\DLLs\tk86t.dll', python3_path + r'\DLLs\tcl86t.dll', '.\img']
     }
 }
 
 executables = [
-    Executable('FdVisualizer.py', base=base)
+    Executable(script='FdVisualizer.py', base=base, icon='.\img\\trilobite.ico')
 ]
 
 setup(name='FdVisualizer',
       version='1.0',
       description='Visualize fdf layout',
-	  executables=executables,
-	  options=options
-	  )
+      executables=executables,
+      options=options
+      )

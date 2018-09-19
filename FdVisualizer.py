@@ -103,7 +103,7 @@ def main():
         cfgDict = {}
 
     root = tkinter.Tk()
-    root.iconbitmap(r'.\trilobite.ico')
+    root.iconbitmap(r'.\img\trilobite.ico')
     app = MainGui(root, cfgDict)
     root.mainloop()
 
