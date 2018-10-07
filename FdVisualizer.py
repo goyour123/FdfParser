@@ -33,8 +33,11 @@ class MainGui:
         menubar.add_cascade(label=" File ", menu=fileMenu)
         self.rt.config(menu=menubar)
 
-        self.flashFrame = tkinter.Frame(self.rt, relief='groove', bd=2)
-        self.flashFrame.grid(row=1, padx=15)
+        # Flash Canvas
+        self.canvas = tkinter.Canvas(self.rt)
+        self.flashCanvas = tkinter.Canvas(self.canvas, height=460, width=460)
+        self.flashFrame = tkinter.Frame(self.flashCanvas, relief='groove', bd=2)
+        self.flashCanvas.create_window((0, 0), window=self.flashFrame, anchor='nw')
 
         # Listbox for each FD
         self.fdListbox = tkinter.Listbox(self.rt, height=MAX_FD_NUM, selectmode=tkinter.SINGLE)
@@ -44,6 +47,21 @@ class MainGui:
             self.fdDict, self.macroDict, self.cfgDict = parse(self.cfgDict)
             self.cr8FdListbox()
             self.buildFlashMap()
+
+        self.scrollbar_init()
+
+        self.canvas.pack(anchor='w', padx=15)
+        self.flashCanvas.pack(anchor='w')
+
+    def scrollbar_init(self):
+        self.scrollbar = tkinter.Scrollbar(self.canvas, command=self.flashCanvas.yview)
+        self.scrollbar.pack(side=tkinter.RIGHT, fill='y')
+
+        self.flashCanvas.configure(yscrollcommand = self.scrollbar.set)
+        self.flashCanvas.bind('<Configure>', self.on_configure)
+
+    def on_configure(self, event):
+        self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
 
     def gui_interface_init(self):
         self.rt.title('FdVisualizer')
@@ -71,7 +89,7 @@ class MainGui:
         self.fdListbox.delete(0, 'end')
         for fd in self.fdDict:
             self.fdListbox.insert('end', fd)
-        self.fdListbox.grid(row=0, column=0, rowspan=1, columnspan=1, sticky='w', padx=15, pady=5)
+        self.fdListbox.pack(anchor='nw', padx=15, pady=5)
         self.fdListbox.bind('<<ListboxSelect>>', self.onSelect)
         self.fdListbox.selection_set(0, None)
         self.curFd = self.fdListbox.selection_get()
