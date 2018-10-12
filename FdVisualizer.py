@@ -60,7 +60,7 @@ class MainGui:
         self.flashCanvas.configure(yscrollcommand = self.scrollbar.set)
         self.flashCanvas.bind('<Configure>', self.on_configure)
 
-    def on_configure(self, event):
+    def on_configure(self, evt):
         self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
 
     def gui_interface_init(self):
@@ -84,16 +84,21 @@ class MainGui:
         if self.curFd != selFd:
             self.curFd = selFd
             self.buildFlashMap()
+            self.flashFrame.update_idletasks()
+            self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
 
     def cr8FdListbox(self):
         self.fdListbox.delete(0, 'end')
         for fd in self.fdDict:
+
             self.fdListbox.insert('end', fd)
         self.fdListbox.pack(anchor='nw', padx=15, pady=5)
         self.fdListbox.bind('<<ListboxSelect>>', self.onSelect)
         self.fdListbox.selection_set(0, None)
         self.curFd = self.fdListbox.selection_get()
         self.buildFlashMap()
+        self.flashFrame.update_idletasks()
+        self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
 
     def buildFlashMap(self):
         fdOffset, nulBlk= 0, 0
@@ -113,7 +118,6 @@ class MainGui:
         tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset))).grid(row=idx + nulBlk + 2 + 1, column=2, rowspan=1, columnspan=1, sticky='w')
 
 def main():
-
     try:
         with open('config.json', 'r') as f:
             cfgDict = json.load(f)
