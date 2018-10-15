@@ -40,32 +40,30 @@ class MainGui:
         self.flashCanvas.create_window((0, 0), window=self.flashFrame, anchor='nw')
 
         # Listbox for each FD
-        self.fdListbox = tkinter.Listbox(self.rt, height=MAX_FD_NUM, selectmode=tkinter.SINGLE)
+        self.fdListbox = tkinter.Listbox(self.rt, height=MAX_FD_NUM, width=15, selectmode=tkinter.SINGLE)
         self.curFd = None
+
+        self.scrollbar = tkinter.Scrollbar(self.canvas, command=self.flashCanvas.yview)
+
+        self.scrollbar.pack(side=tkinter.RIGHT, fill='y')
+        self.fdListbox.pack(anchor='nw', padx=15, pady=5)
+        self.canvas.pack(anchor='w', padx=15)
+        self.flashCanvas.pack(anchor='w')
+
+        self.flashCanvas.configure(yscrollcommand = self.scrollbar.set)
+        self.flashCanvas.bind('<Configure>', self.on_configure)
 
         if 'Fdf' in cfgDict:
             self.fdDict, self.macroDict, self.cfgDict = parse(self.cfgDict)
             self.cr8FdListbox()
             self.buildFlashMap()
 
-        self.scrollbar_init()
-
-        self.canvas.pack(anchor='w', padx=15)
-        self.flashCanvas.pack(anchor='w')
-
-    def scrollbar_init(self):
-        self.scrollbar = tkinter.Scrollbar(self.canvas, command=self.flashCanvas.yview)
-        self.scrollbar.pack(side=tkinter.RIGHT, fill='y')
-
-        self.flashCanvas.configure(yscrollcommand = self.scrollbar.set)
-        self.flashCanvas.bind('<Configure>', self.on_configure)
-
     def on_configure(self, evt):
         self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
 
     def gui_interface_init(self):
         self.rt.title('FdVisualizer')
-        self.rt.geometry("600x650+350+80")
+        self.rt.geometry("515x570+350+80")
 
     def browser(self):
         if 'Fdf' in self.cfgDict:
@@ -90,9 +88,7 @@ class MainGui:
     def cr8FdListbox(self):
         self.fdListbox.delete(0, 'end')
         for fd in self.fdDict:
-
             self.fdListbox.insert('end', fd)
-        self.fdListbox.pack(anchor='nw', padx=15, pady=5)
         self.fdListbox.bind('<<ListboxSelect>>', self.onSelect)
         self.fdListbox.selection_set(0, None)
         self.curFd = self.fdListbox.selection_get()
