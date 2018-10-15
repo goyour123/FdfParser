@@ -40,15 +40,21 @@ class MainGui:
         self.flashCanvas.create_window((0, 0), window=self.flashFrame, anchor='nw')
 
         # Listbox for each FD
-        self.fdListbox = tkinter.Listbox(self.rt, height=MAX_FD_NUM, width=15, selectmode=tkinter.SINGLE)
+        self.fdListbox = tkinter.Listbox(self.rt, height=MAX_FD_NUM, width=20, selectmode=tkinter.SINGLE)
         self.curFd = None
 
+        # Scrollbar of Flash Canvas frame
         self.scrollbar = tkinter.Scrollbar(self.canvas, command=self.flashCanvas.yview)
 
+        # Button
+        self.prsBtn = tkinter.Button(self.rt, text='Parse', command=self.prsBtnCallback, height=MAX_FD_NUM, width=20, state=tkinter.DISABLED)
+
+        self.fdListbox.place(x=10, y=5)
+        self.prsBtn.place(x=160, y=5)
+        self.canvas.place(x=10, y=60)
+
         self.scrollbar.pack(side=tkinter.RIGHT, fill='y')
-        self.fdListbox.pack(anchor='nw', padx=15, pady=5)
-        self.canvas.pack(anchor='w', padx=15)
-        self.flashCanvas.pack(anchor='w')
+        self.flashCanvas.pack()
 
         self.flashCanvas.configure(yscrollcommand = self.scrollbar.set)
         self.flashCanvas.bind('<Configure>', self.on_configure)
@@ -56,7 +62,7 @@ class MainGui:
         if 'Fdf' in cfgDict:
             self.fdDict, self.macroDict, self.cfgDict = parse(self.cfgDict)
             self.cr8FdListbox()
-            self.buildFlashMap()
+            self.prsBtn.configure(state=tkinter.NORMAL)
 
     def on_configure(self, evt):
         self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
@@ -64,6 +70,12 @@ class MainGui:
     def gui_interface_init(self):
         self.rt.title('FdVisualizer')
         self.rt.geometry("515x570+350+80")
+
+    def prsBtnCallback(self):
+        self.fdDict, self.macroDict, self.cfgDict = parse(self.cfgDict)
+        self.buildFlashMap()
+        self.flashFrame.update_idletasks()
+        self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
 
     def browser(self):
         if 'Fdf' in self.cfgDict:
@@ -75,6 +87,7 @@ class MainGui:
             self.cfgDict.update({'Fdf': loadCfgFile.name})
             self.fdDict, self.macroDict, self.cfgDict = parse(self.cfgDict)
             self.cr8FdListbox()
+            self.prsBtn.configure(state=tkinter.NORMAL)
             self.loadCfgFile = loadCfgFile
 
     def onSelect(self, evt):
