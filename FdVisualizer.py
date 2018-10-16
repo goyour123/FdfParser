@@ -36,7 +36,7 @@ class MainGui:
         # Flash Canvas
         self.canvas = tkinter.Canvas(self.rt)
         self.flashCanvas = tkinter.Canvas(self.canvas, height=460, width=460)
-        self.flashFrame = tkinter.Frame(self.flashCanvas, relief='groove', bd=2)
+        self.flashFrame = tkinter.Frame(self.flashCanvas, relief='sunken', bd=2)
         self.flashCanvas.create_window((0, 0), window=self.flashFrame, anchor='nw')
 
         # Listbox for each FD
@@ -46,12 +46,16 @@ class MainGui:
         # Scrollbar of Flash Canvas frame
         self.scrollbar = tkinter.Scrollbar(self.canvas, command=self.flashCanvas.yview)
 
-        # Button
-        self.prsBtn = tkinter.Button(self.rt, text='Parse', command=self.prsBtnCallback, height=MAX_FD_NUM, width=20, state=tkinter.DISABLED)
+        # Button of parsing file
+        self.prsBtn = tkinter.Button(self.rt, text='Parse', command=self.prsBtnCallback, height=3, width=10, state=tkinter.DISABLED)
+
+        # Canvas of checkbutton
+        #self.cbCanvas = tkinter.Canvas(self.rt, height=50, width=225, relief='groove', bd=1)
 
         self.fdListbox.place(x=10, y=5)
-        self.prsBtn.place(x=160, y=5)
-        self.canvas.place(x=10, y=60)
+        self.prsBtn.place(x=390, y=5)
+        #self.cbCanvas.place(x=155, y=5)
+        self.canvas.place(x=10, y=65)
 
         self.scrollbar.pack(side=tkinter.RIGHT, fill='y')
         self.flashCanvas.pack()
