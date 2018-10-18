@@ -71,7 +71,7 @@ def dictUpdateJson(jsonFilePath, dictUpdate):
 def parse(config_dict):
 
     fd_info, fd_list, fd_count = {}, [], 0
-    macro_dict = {}
+    macro_dict, switch_inused = {}, set()
 
     with open(config_dict['Fdf'], 'r') as f:
 
@@ -122,6 +122,7 @@ def parse(config_dict):
                                 config_dict['Switch'][oprda] = 'NO'
 
                     cond_nest.append(get_cond(get_macro_value(oprda, config_dict['Switch']), oprdb, '=='))
+                    switch_inused.add(oprda)
                 elif statement[0] == 'else':
                     cond_nest[-1] = not cond_nest[-1]
                 elif statement[0] == 'endif':
@@ -140,7 +141,7 @@ def parse(config_dict):
                 # Collect MACROs into a dict
                 macro_dict = update_macro_dict(macro[0], line, macro_dict)
 
-    return fd_info, macro_dict, config_dict
+    return fd_info, macro_dict, config_dict, switch_inused
 
 if __name__ == '__main__':
     try:
@@ -165,7 +166,7 @@ if __name__ == '__main__':
         else:
             config_dict = {'Fdf': sys.argv[1]}
 
-    fd_dict, macro_dict, config_dict = parse(config_dict)
+    fd_dict, macro_dict, config_dict, switch_inused = parse(config_dict)
 
     # Output the MACRO dict as a JSON file
     # dictUpdateJson('macro.json', macro_dict)

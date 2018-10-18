@@ -64,7 +64,7 @@ class MainGui:
         self.flashCanvas.bind('<Configure>', self.on_configure)
 
         if 'Fdf' in cfgDict:
-            self.fdDict, self.macroDict, self.cfgDict = parse(self.cfgDict)
+            self.fdDict, self.macroDict, self.cfgDict, self.switchInused = parse(self.cfgDict)
             self.cr8FdListbox()
             self.prsBtn.configure(state=tkinter.NORMAL)
 
@@ -76,7 +76,7 @@ class MainGui:
         self.rt.geometry("515x570+350+80")
 
     def prsBtnCallback(self):
-        self.fdDict, self.macroDict, self.cfgDict = parse(self.cfgDict)
+        self.fdDict, self.macroDict, self.cfgDict, self.switchInused = parse(self.cfgDict)
         self.buildFlashMap()
         self.flashFrame.update_idletasks()
         self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
@@ -89,7 +89,7 @@ class MainGui:
         loadCfgFile = tkinter.filedialog.askopenfile(title='Browse source path', initialdir=initDir, filetypes=[("fdf", "*.fdf")])
         if loadCfgFile:
             self.cfgDict.update({'Fdf': loadCfgFile.name})
-            self.fdDict, self.macroDict, self.cfgDict = parse(self.cfgDict)
+            self.fdDict, self.macroDict, self.cfgDict, self.switchInused = parse(self.cfgDict)
             self.cr8FdListbox()
             self.prsBtn.configure(state=tkinter.NORMAL)
             self.loadCfgFile = loadCfgFile
