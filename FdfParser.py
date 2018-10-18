@@ -71,7 +71,7 @@ def dictUpdateJson(jsonFilePath, dictUpdate):
 def parse(config_dict):
 
     fd_info, fd_list, fd_count = {}, [], 0
-    macro_dict, switch_inused = {}, set()
+    macro_dict, switch_inused = {}, {}
 
     with open(config_dict['Fdf'], 'r') as f:
 
@@ -122,7 +122,7 @@ def parse(config_dict):
                                 config_dict['Switch'][oprda] = 'NO'
 
                     cond_nest.append(get_cond(get_macro_value(oprda, config_dict['Switch']), oprdb, '=='))
-                    switch_inused.add(oprda)
+                    switch_inused.update({oprda: config_dict['Switch'][oprda]})
                 elif statement[0] == 'else':
                     cond_nest[-1] = not cond_nest[-1]
                 elif statement[0] == 'endif':
