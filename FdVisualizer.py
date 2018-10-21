@@ -44,33 +44,50 @@ class MainGui:
         self.curFd = None
 
         # Scrollbar of Flash Canvas frame
-        self.scrollbar = tkinter.Scrollbar(self.canvas, command=self.flashCanvas.yview)
+        self.scrollbarFlash = tkinter.Scrollbar(self.canvas, command=self.flashCanvas.yview)
 
         # Button of parsing file
         self.prsBtn = tkinter.Button(self.rt, text='Parse', command=self.prsBtnCallback, height=3, width=10, state=tkinter.DISABLED)
 
         # Canvas of checkbutton
-        #self.cbCanvas = tkinter.Canvas(self.rt, height=50, width=225, relief='groove', bd=1)
+        self.cbCanvas = tkinter.Canvas(self.rt)
+        self.cbInCanvas = tkinter.Canvas(self.cbCanvas, height=50, width=205, relief='groove', bd=1)
+        self.cbFrame = tkinter.Frame(self.cbInCanvas)
+        self.cbInCanvas.create_window((0, 0), window=self.cbFrame, anchor='nw')
+
+        # Scrollbar of checkbutton frame
+        self.scrollbarCb = tkinter.Scrollbar(self.cbCanvas, command=self.cbInCanvas.yview)
 
         self.fdListbox.place(x=10, y=5)
         self.prsBtn.place(x=390, y=5)
-        #self.cbCanvas.place(x=155, y=5)
+        # self.cbCanvas.place(x=155, y=5)
         self.canvas.place(x=10, y=65)
 
-        self.scrollbar.pack(side=tkinter.RIGHT, fill='y')
-        self.flashCanvas.pack()
+        self.scrollbarFlash.pack(side=tkinter.RIGHT, fill='y')
+        self.scrollbarCb.pack(side=tkinter.RIGHT, fill='y')
 
-        self.flashCanvas.configure(yscrollcommand = self.scrollbar.set)
-        self.flashCanvas.bind('<Configure>', self.on_configure)
+        self.flashCanvas.pack()
+        self.cbInCanvas.pack()
+
+        self.flashCanvas.configure(yscrollcommand = self.scrollbarFlash.set)
+        self.flashCanvas.bind('<Configure>', self.flashOnConfig)
+
+        self.cbInCanvas.configure(yscrollcommand = self.scrollbarCb.set)
+        self.cbInCanvas.bind('<Configure>', self.cbOnConfig)
 
         if 'Fdf' in cfgDict:
             self.fdDict, self.macroDict, self.cfgDict, self.switchInused = parse(self.cfgDict)
             self.cr8FdListbox()
-            # self.cr8DynCheckbtn()
+            self.cr8DynCheckbtn()
             self.prsBtn.configure(state=tkinter.NORMAL)
 
-    def on_configure(self, evt):
+        self.cbInCanvas.configure(scrollregion=self.cbInCanvas.bbox('all'))
+
+    def flashOnConfig(self, evt):
         self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
+
+    def cbOnConfig(self, evt):
+        self.cbInCanvas.configure(scrollregion=self.cbInCanvas.bbox('all'))
 
     def gui_interface_init(self):
         self.rt.title('FdVisualizer')
@@ -92,6 +109,7 @@ class MainGui:
             self.cfgDict.update({'Fdf': loadCfgFile.name})
             self.fdDict, self.macroDict, self.cfgDict, self.switchInused = parse(self.cfgDict)
             self.cr8FdListbox()
+            self.cr8DynCheckbtn()
             self.prsBtn.configure(state=tkinter.NORMAL)
             self.loadCfgFile = loadCfgFile
 
@@ -103,21 +121,22 @@ class MainGui:
             self.flashFrame.update_idletasks()
             self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
 
-    # def cr8DynCheckbtn(self):
+    def cr8DynCheckbtn(self):
+        for w in self.cbFrame.winfo_children():
+            w.destroy()
 
-    #     for w in self.cbCanvas.winfo_children():
-    #         w.destroy()
+        self.cbDict = {}
 
-    #     self.cbDict = {}
+        for idx, switch in enumerate(self.switchInused):
+            self.cbDict.update({switch: tkinter.IntVar()})
+            cb = tkinter.Checkbutton(self.cbFrame, text=switch, variable=self.cbDict[switch], command=self.checkBtnCallback)
+            cb.grid(row=idx, column=0, sticky=tkinter.NW)
+        self.cbFrame.update_idletasks()
+        self.cbInCanvas.configure(scrollregion=self.cbInCanvas.bbox('all'))
 
-    #     for idx, switch in enumerate(self.switchInused):
-    #         self.cbDict.update({switch: tkinter.IntVar()})
-    #         cb = tkinter.Checkbutton(self.cbCanvas, text=switch, variable=self.cbDict[switch], command=self.checkBtnCallback)
-    #         cb.pack()
-
-    # def checkBtnCallback(self):
-    #     for switch in self.cbDict:
-    #         print (self.cbDict[switch].get())
+    def checkBtnCallback(self):
+        for switch in self.cbDict:
+            print (self.cbDict[switch].get())
 
     def cr8FdListbox(self):
         self.fdListbox.delete(0, 'end')
