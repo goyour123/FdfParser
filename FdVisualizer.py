@@ -23,7 +23,7 @@ class MainGui:
 
         self.rt = rt
         self.cfgDict = cfgDict
-        self.loadCfgFile = None
+        self.loadCfgFile, self.switchSel = None, None
         self.gui_interface_init()
 
         # Menubar
@@ -60,7 +60,7 @@ class MainGui:
 
         self.fdListbox.place(x=10, y=5)
         self.prsBtn.place(x=390, y=5)
-        # self.cbCanvas.place(x=155, y=5)
+        self.cbCanvas.place(x=155, y=5)
         self.canvas.place(x=10, y=65)
 
         self.scrollbarFlash.pack(side=tkinter.RIGHT, fill='y')
@@ -80,8 +80,6 @@ class MainGui:
             self.cr8FdListbox()
             self.cr8DynCheckbtn()
             self.prsBtn.configure(state=tkinter.NORMAL)
-
-        self.cbInCanvas.configure(scrollregion=self.cbInCanvas.bbox('all'))
 
     def flashOnConfig(self, evt):
         self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
@@ -122,21 +120,26 @@ class MainGui:
             self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
 
     def cr8DynCheckbtn(self):
+        self.cbDict = {}
         for w in self.cbFrame.winfo_children():
             w.destroy()
-
-        self.cbDict = {}
 
         for idx, switch in enumerate(self.switchInused):
             self.cbDict.update({switch: tkinter.IntVar()})
             cb = tkinter.Checkbutton(self.cbFrame, text=switch, variable=self.cbDict[switch], command=self.checkBtnCallback)
+            if self.switchInused[switch] == 'YES':
+                cb.select()
             cb.grid(row=idx, column=0, sticky=tkinter.NW)
         self.cbFrame.update_idletasks()
         self.cbInCanvas.configure(scrollregion=self.cbInCanvas.bbox('all'))
 
     def checkBtnCallback(self):
         for switch in self.cbDict:
-            print (self.cbDict[switch].get())
+            if self.cbDict[switch].get() == 1:
+                self.cfgDict['Switch'].update({switch: 'YES'})
+            else:
+                self.cfgDict['Switch'].update({switch: 'NO'})
+        self.switchSel = True
 
     def cr8FdListbox(self):
         self.fdListbox.delete(0, 'end')
@@ -178,7 +181,7 @@ def main():
     app = MainGui(root, cfgDict)
     root.mainloop()
 
-    if app.loadCfgFile:
+    if app.loadCfgFile or app.switchSel:
         dictUpdateJson('config.json', app.cfgDict)
 
 if __name__ == '__main__':
