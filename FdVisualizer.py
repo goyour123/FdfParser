@@ -58,7 +58,7 @@ class MainGui:
         # Scrollbar of checkbutton frame
         self.scrollbarCb = tkinter.Scrollbar(self.cbCanvas, command=self.cbInCanvas.yview)
 
-        self.fdListbox.place(x=10, y=5)
+        self.fdListbox.place(x=10, y=6)
         self.prsBtn.place(x=390, y=5)
         self.cbCanvas.place(x=155, y=5)
         self.canvas.place(x=10, y=65)
@@ -140,6 +140,7 @@ class MainGui:
             else:
                 self.cfgDict['Switch'].update({switch: 'NO'})
         self.switchSel = True
+        self.prsBtnCallback()
 
     def cr8FdListbox(self):
         self.fdListbox.delete(0, 'end')
