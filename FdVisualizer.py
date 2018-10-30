@@ -24,6 +24,7 @@ class MainGui:
         self.rt = rt
         self.cfgDict = cfgDict
         self.loadCfgFile, self.switchSel = None, None
+        self.preSelRgnWidget, self.preSelRgnColor = None, None
         self.gui_interface_init()
 
         # Menubar
@@ -153,19 +154,38 @@ class MainGui:
         self.flashFrame.update_idletasks()
         self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
 
+    def rgnButtonCallback(self, evt):
+        # Restore the previous selected label's background color
+        if self.preSelRgnWidget:
+            self.preSelRgnWidget.configure(bg=self.preSelRgnColor)
+        self.preSelRgnWidget = evt.widget
+        self.preSelRgnColor = evt.widget.cget('bg')
+
+        # Configure the selected label's backgroundcolor
+        evt.widget.configure(bg='#34d100')
+
+        # for w in self.flashFrame.winfo_children():
+        #     if re.match(r'0x[0-9A-F]+_[0-9A-F]+', w.cget('text')):
+        #         print(w.cget('text'))
+
     def buildFlashMap(self):
-        fdOffset, nulBlk= 0, 0
+        fdOffset, nulBlk, rgnLabel = 0, 0, None
 
         for w in self.flashFrame.winfo_children():
+            self.preSelRgnWidget, self.preSelRgnColor = None, None
             w.destroy()
 
         for idx, rgn in enumerate(self.fdDict[self.curFd]):
             rgnOffset, rgnSize = get_value(rgn[0], self.macroDict), get_value(rgn[1], self.macroDict)
             if fdOffset < rgnOffset:
-                tkinter.Label(self.flashFrame, text="", relief='ridge', bg='gray'+ str(6 + ((idx + nulBlk) % 2) * 2) +'1', bd=2, width=50).grid(row=idx + nulBlk + 2, column=0, rowspan=2, columnspan=1, padx=15)
+                rgnLabel = tkinter.Label(self.flashFrame, text="", relief='ridge', bg='gray'+ str(6 + ((idx + nulBlk) % 2) * 2) +'1', bd=2, width=50)
+                rgnLabel.grid(row=idx + nulBlk + 2, column=0, rowspan=2, columnspan=1, padx=15)
+                rgnLabel.bind('<Button-1>', self.rgnButtonCallback)
                 tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset))).grid(row=idx + nulBlk + 2, column=2, rowspan=1, columnspan=1, sticky='w')
                 nulBlk += 1
-            tkinter.Label(self.flashFrame, text=cnvRgnName(rgn[0]), relief='ridge', bg='gray'+ str(6 + ((idx + nulBlk) % 2) * 2) +'1', bd=2, width=50).grid(row=idx + nulBlk + 2, column=0, rowspan=2, columnspan=1, padx=15)
+            rgnLabel = tkinter.Label(self.flashFrame, text=cnvRgnName(rgn[0]), relief='ridge', bg='gray'+ str(6 + ((idx + nulBlk) % 2) * 2) +'1', bd=2, width=50)
+            rgnLabel.grid(row=idx + nulBlk + 2, column=0, rowspan=2, columnspan=1, padx=15)
+            rgnLabel.bind('<Button-1>', self.rgnButtonCallback)
             tkinter.Label(self.flashFrame, text=setDisplayHex(hex(rgnOffset))).grid(row=idx + nulBlk + 2, column=2, rowspan=1, columnspan=1, sticky='w')
             fdOffset = rgnOffset + rgnSize
         tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset))).grid(row=idx + nulBlk + 2 + 1, column=2, rowspan=1, columnspan=1, sticky='w')
