@@ -24,7 +24,7 @@ class MainGui:
         self.rt = rt
         self.cfgDict = cfgDict
         self.loadCfgFile, self.switchSel = None, None
-        self.preSelRgnWidget, self.preSelRgnColor = None, None
+        self.preSelRgnWidget, self.preSelRgnColor, self.preSelRgnBaseWidget, self.preSelRgnEndWidget = None, None, None, None
 
         # Menubar
         menubar = tkinter.Menu(self.rt)
@@ -153,38 +153,46 @@ class MainGui:
         # Restore the previous selected label's background color
         if self.preSelRgnWidget:
             self.preSelRgnWidget.configure(bg=self.preSelRgnColor)
+            self.preSelRgnBaseWidget.configure(bg='SystemButtonFace')
+            self.preSelRgnEndWidget.configure(bg='SystemButtonFace')
         self.preSelRgnWidget = evt.widget
         self.preSelRgnColor = evt.widget.cget('bg')
 
         # Configure the selected label's backgroundcolor
         evt.widget.configure(bg='#34d100')
+        rgnGridRow = evt.widget.grid_info()['row']
 
-        # for w in self.flashFrame.winfo_children():
-        #     if re.match(r'0x[0-9A-F]+_[0-9A-F]+', w.cget('text')):
-        #         print(w.cget('text'))
+        for w in self.flashFrame.winfo_children():
+            if re.match(r'0x[0-9A-F]+_[0-9A-F]+', w.cget('text')):
+                if w.grid_info()['row'] == rgnGridRow:
+                    self.preSelRgnBaseWidget = w
+                    w.configure(bg='#fa5fa5')
+                elif w.grid_info()['row'] == rgnGridRow + 1:
+                    self.preSelRgnEndWidget = w
+                    w.configure(bg='#fd5fd5')
 
     def buildFlashMap(self):
         fdOffset, nulBlk, rgnLabel = 0, 0, None
         labelHeight = None
 
         for w in self.flashFrame.winfo_children():
-            self.preSelRgnWidget, self.preSelRgnColor = None, None
+            self.preSelRgnWidget, self.preSelRgnColor, self.preSelRgnBaseWidget, self.preSelRgnEndWidget = None, None, None, None
             w.destroy()
 
         for idx, rgn in enumerate(self.fdDict[self.curFd]):
             rgnOffset, rgnSize = get_value(rgn[0], self.macroDict), get_value(rgn[1], self.macroDict)
             if fdOffset < rgnOffset:
                 rgnLabel = tkinter.Label(self.flashFrame, text="", relief='ridge', bg='gray'+ str(6 + ((idx + nulBlk) % 2) * 2) +'1', bd=2, width=50, height=labelHeight)
-                rgnLabel.grid(row=idx + nulBlk, column=0, rowspan=2, columnspan=1, padx=15)
+                rgnLabel.grid(row=idx + nulBlk, column=0, rowspan=2, columnspan=1, padx=10)
                 rgnLabel.bind('<Button-1>', self.rgnButtonCallback)
-                tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset)), height=labelHeight).grid(row=idx + nulBlk, column=1, rowspan=1, columnspan=1, sticky='w')
+                tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset)), height=labelHeight, width=9).grid(row=idx + nulBlk, column=1, rowspan=1, columnspan=1, sticky='w')
                 nulBlk += 1
             rgnLabel = tkinter.Label(self.flashFrame, text=cnvRgnName(rgn[0]), relief='ridge', bg='gray'+ str(6 + ((idx + nulBlk) % 2) * 2) +'1', bd=2, width=50, height=labelHeight)
-            rgnLabel.grid(row=idx + nulBlk, column=0, rowspan=2, columnspan=1, padx=15)
+            rgnLabel.grid(row=idx + nulBlk, column=0, rowspan=2, columnspan=1, padx=10)
             rgnLabel.bind('<Button-1>', self.rgnButtonCallback)
-            tkinter.Label(self.flashFrame, text=setDisplayHex(hex(rgnOffset)), height=labelHeight).grid(row=idx + nulBlk, column=1, rowspan=1, columnspan=1, sticky='w')
+            tkinter.Label(self.flashFrame, text=setDisplayHex(hex(rgnOffset)), height=labelHeight, width=9).grid(row=idx + nulBlk, column=1, rowspan=1, columnspan=1, sticky='w')
             fdOffset = rgnOffset + rgnSize
-        tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset)), height=labelHeight).grid(row=idx + nulBlk + 1, column=1, rowspan=1, columnspan=1, sticky='w')
+        tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset)), height=labelHeight, width=9).grid(row=idx + nulBlk + 1, column=1, rowspan=1, columnspan=1, sticky='w')
 
 def main():
     try:
