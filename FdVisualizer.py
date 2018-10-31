@@ -25,7 +25,6 @@ class MainGui:
         self.cfgDict = cfgDict
         self.loadCfgFile, self.switchSel = None, None
         self.preSelRgnWidget, self.preSelRgnColor = None, None
-        self.gui_interface_init()
 
         # Menubar
         menubar = tkinter.Menu(self.rt)
@@ -87,10 +86,6 @@ class MainGui:
 
     def cbOnConfig(self, evt):
         self.cbInCanvas.configure(scrollregion=self.cbInCanvas.bbox('all'))
-
-    def gui_interface_init(self):
-        self.rt.title('FdVisualizer')
-        self.rt.geometry("515x570+350+80")
 
     def prsBtnCallback(self):
         self.fdDict, self.macroDict, self.cfgDict, self.switchInused = parse(self.cfgDict)
@@ -170,6 +165,7 @@ class MainGui:
 
     def buildFlashMap(self):
         fdOffset, nulBlk, rgnLabel = 0, 0, None
+        labelHeight = None
 
         for w in self.flashFrame.winfo_children():
             self.preSelRgnWidget, self.preSelRgnColor = None, None
@@ -178,17 +174,17 @@ class MainGui:
         for idx, rgn in enumerate(self.fdDict[self.curFd]):
             rgnOffset, rgnSize = get_value(rgn[0], self.macroDict), get_value(rgn[1], self.macroDict)
             if fdOffset < rgnOffset:
-                rgnLabel = tkinter.Label(self.flashFrame, text="", relief='ridge', bg='gray'+ str(6 + ((idx + nulBlk) % 2) * 2) +'1', bd=2, width=50)
-                rgnLabel.grid(row=idx + nulBlk + 2, column=0, rowspan=2, columnspan=1, padx=15)
+                rgnLabel = tkinter.Label(self.flashFrame, text="", relief='ridge', bg='gray'+ str(6 + ((idx + nulBlk) % 2) * 2) +'1', bd=2, width=50, height=labelHeight)
+                rgnLabel.grid(row=idx + nulBlk, column=0, rowspan=2, columnspan=1, padx=15)
                 rgnLabel.bind('<Button-1>', self.rgnButtonCallback)
-                tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset))).grid(row=idx + nulBlk + 2, column=2, rowspan=1, columnspan=1, sticky='w')
+                tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset)), height=labelHeight).grid(row=idx + nulBlk, column=1, rowspan=1, columnspan=1, sticky='w')
                 nulBlk += 1
-            rgnLabel = tkinter.Label(self.flashFrame, text=cnvRgnName(rgn[0]), relief='ridge', bg='gray'+ str(6 + ((idx + nulBlk) % 2) * 2) +'1', bd=2, width=50)
-            rgnLabel.grid(row=idx + nulBlk + 2, column=0, rowspan=2, columnspan=1, padx=15)
+            rgnLabel = tkinter.Label(self.flashFrame, text=cnvRgnName(rgn[0]), relief='ridge', bg='gray'+ str(6 + ((idx + nulBlk) % 2) * 2) +'1', bd=2, width=50, height=labelHeight)
+            rgnLabel.grid(row=idx + nulBlk, column=0, rowspan=2, columnspan=1, padx=15)
             rgnLabel.bind('<Button-1>', self.rgnButtonCallback)
-            tkinter.Label(self.flashFrame, text=setDisplayHex(hex(rgnOffset))).grid(row=idx + nulBlk + 2, column=2, rowspan=1, columnspan=1, sticky='w')
+            tkinter.Label(self.flashFrame, text=setDisplayHex(hex(rgnOffset)), height=labelHeight).grid(row=idx + nulBlk, column=1, rowspan=1, columnspan=1, sticky='w')
             fdOffset = rgnOffset + rgnSize
-        tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset))).grid(row=idx + nulBlk + 2 + 1, column=2, rowspan=1, columnspan=1, sticky='w')
+        tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset)), height=labelHeight).grid(row=idx + nulBlk + 1, column=1, rowspan=1, columnspan=1, sticky='w')
 
 def main():
     try:
@@ -198,8 +194,12 @@ def main():
         cfgDict = {}
 
     root = tkinter.Tk()
-    root.iconbitmap(r'.\img\trilobite.ico')
     app = MainGui(root, cfgDict)
+
+    root.iconbitmap(r'.\img\trilobite.ico')
+    root.title('FdVisualizer')
+    root.geometry("515x570+500+80")
+
     root.mainloop()
 
     if app.loadCfgFile or app.switchSel:
