@@ -4,8 +4,8 @@ from FdfParser import parse, get_value, dictUpdateJson
 
 MAX_FD_NUM = 3
 
-def cnvRgnName(RgnDef):
-    return re.search(r'[FLASH]+_REGION_(.+)_[A-Z]+', RgnDef).group(1)
+def cnvRgnName(rgnDef):
+    return re.search(r'[FLASH]+_REGION_(.+)_[A-Z]+', rgnDef).group(1)
 
 def getJsnKey(jsnPath, key):
     try:
@@ -16,7 +16,10 @@ def getJsnKey(jsnPath, key):
         return None
 
 def setDisplayHex(h):
-    return '0x' + ((h[2:].zfill(6))[0:2] + '_' + (h[2:].zfill(6))[2:6]).upper()
+    return '0x' + ((h[2:].zfill(7))[0:3] + '_' + (h[2:].zfill(7))[3:7]).upper()
+
+def revDisplayHex(s):
+    return s.replace('_', '')
 
 class MainGui:
     def __init__(self, rt, cfgDict):
@@ -58,10 +61,14 @@ class MainGui:
         # Scrollbar of checkbutton frame
         self.scrollbarCb = tkinter.Scrollbar(self.cbCanvas, command=self.cbInCanvas.yview)
 
+        # Entrybox of flash region size
+        self.rgnSizeEntry = tkinter.Entry(self.rt, state='disabled', width=20)
+
         self.fdListbox.place(x=10, y=6)
         self.prsBtn.place(x=390, y=5)
         self.cbCanvas.place(x=155, y=5)
-        self.canvas.place(x=10, y=65)
+        self.canvas.place(x=10, y=90)
+        self.rgnSizeEntry.place(x=325, y=65)
 
         self.scrollbarFlash.pack(side=tkinter.RIGHT, fill='y')
         self.scrollbarCb.pack(side=tkinter.RIGHT, fill='y')
@@ -170,6 +177,14 @@ class MainGui:
                 elif w.grid_info()['row'] == rgnGridRow + 1:
                     self.preSelRgnEndWidget = w
                     w.configure(bg='#fd5fd5')
+                    rgnSize = hex(int(revDisplayHex(self.preSelRgnEndWidget.cget('text')), 16) - \
+                                    int(revDisplayHex(self.preSelRgnBaseWidget.cget('text')), 16))[2:]
+
+        self.rgnSizeEntry.configure(state='normal')
+        self.rgnSizeEntry.delete(0, 'end')
+        self.rgnSizeEntry.insert(0, rgnSize.upper())
+        if not evt.widget.cget('text'):
+            self.rgnSizeEntry.configure(state='disabled')
 
     def buildFlashMap(self):
         fdOffset, nulBlk, rgnLabel = 0, 0, None
@@ -177,18 +192,20 @@ class MainGui:
 
         for w in self.flashFrame.winfo_children():
             self.preSelRgnWidget, self.preSelRgnColor, self.preSelRgnBaseWidget, self.preSelRgnEndWidget = None, None, None, None
+            self.rgnSizeEntry.delete(0, 'end')
+            self.rgnSizeEntry.configure(state="disabled")
             w.destroy()
 
         for idx, rgn in enumerate(self.fdDict[self.curFd]):
             rgnOffset, rgnSize = get_value(rgn[0], self.macroDict), get_value(rgn[1], self.macroDict)
             if fdOffset < rgnOffset:
                 rgnLabel = tkinter.Label(self.flashFrame, text="", relief='ridge', bg='gray'+ str(6 + ((idx + nulBlk) % 2) * 2) +'1', bd=2, width=50, height=labelHeight)
-                rgnLabel.grid(row=idx + nulBlk, column=0, rowspan=2, columnspan=1, padx=10)
+                rgnLabel.grid(row=idx + nulBlk, column=0, rowspan=2, columnspan=1, padx=8)
                 rgnLabel.bind('<Button-1>', self.rgnButtonCallback)
                 tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset)), height=labelHeight, width=9).grid(row=idx + nulBlk, column=1, rowspan=1, columnspan=1, sticky='w')
                 nulBlk += 1
             rgnLabel = tkinter.Label(self.flashFrame, text=cnvRgnName(rgn[0]), relief='ridge', bg='gray'+ str(6 + ((idx + nulBlk) % 2) * 2) +'1', bd=2, width=50, height=labelHeight)
-            rgnLabel.grid(row=idx + nulBlk, column=0, rowspan=2, columnspan=1, padx=10)
+            rgnLabel.grid(row=idx + nulBlk, column=0, rowspan=2, columnspan=1, padx=8)
             rgnLabel.bind('<Button-1>', self.rgnButtonCallback)
             tkinter.Label(self.flashFrame, text=setDisplayHex(hex(rgnOffset)), height=labelHeight, width=9).grid(row=idx + nulBlk, column=1, rowspan=1, columnspan=1, sticky='w')
             fdOffset = rgnOffset + rgnSize
@@ -206,7 +223,7 @@ def main():
 
     root.iconbitmap(r'.\img\trilobite.ico')
     root.title('FdVisualizer')
-    root.geometry("515x570+500+80")
+    root.geometry("515x590+450+40")
 
     root.mainloop()
 
