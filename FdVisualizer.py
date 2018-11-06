@@ -62,13 +62,17 @@ class MainGui:
         self.scrollbarCb = tkinter.Scrollbar(self.cbCanvas, command=self.cbInCanvas.yview)
 
         # Entrybox of flash region size
-        self.rgnSizeEntry = tkinter.Entry(self.rt, state='disabled', width=20)
+        self.rgnSizeEntry = tkinter.Entry(self.rt, state='disabled', width=18)
+
+        # Label of flash region size
+        self.rgnSizeLabel = tkinter.Label(self.rt, width=45, anchor='e')
 
         self.fdListbox.place(x=10, y=6)
-        self.prsBtn.place(x=390, y=5)
         self.cbCanvas.place(x=155, y=5)
-        self.canvas.place(x=10, y=90)
-        self.rgnSizeEntry.place(x=325, y=65)
+        self.prsBtn.place(x=390, y=5)
+        self.rgnSizeEntry.place(x=340, y=68)
+        self.rgnSizeLabel.place(x=10, y=67)
+        self.canvas.place(x=10, y=95)
 
         self.scrollbarFlash.pack(side=tkinter.RIGHT, fill='y')
         self.scrollbarCb.pack(side=tkinter.RIGHT, fill='y')
@@ -186,6 +190,8 @@ class MainGui:
         if not evt.widget.cget('text'):
             self.rgnSizeEntry.configure(state='disabled')
 
+        self.rgnSizeLabel.configure(text=evt.widget.cget('text'))
+
     def buildFlashMap(self):
         fdOffset, nulBlk, rgnLabel = 0, 0, None
         labelHeight = None
@@ -194,6 +200,7 @@ class MainGui:
             self.preSelRgnWidget, self.preSelRgnColor, self.preSelRgnBaseWidget, self.preSelRgnEndWidget = None, None, None, None
             self.rgnSizeEntry.delete(0, 'end')
             self.rgnSizeEntry.configure(state="disabled")
+            self.rgnSizeLabel.configure(text='')
             w.destroy()
 
         for idx, rgn in enumerate(self.fdDict[self.curFd]):
