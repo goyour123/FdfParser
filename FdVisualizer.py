@@ -28,6 +28,7 @@ class MainGui:
         self.cfgDict = cfgDict
         self.loadCfgFile, self.switchSel = None, None
         self.preSelRgnWidget, self.preSelRgnColor, self.preSelRgnBaseWidget, self.preSelRgnEndWidget = None, None, None, None
+        self.curFd = None
 
         # Menubar
         menubar = tkinter.Menu(self.rt)
@@ -43,8 +44,8 @@ class MainGui:
         self.flashCanvas.create_window((0, 0), window=self.flashFrame, anchor='nw')
 
         # Listbox for each FD
-        self.fdListbox = tkinter.Listbox(self.rt, height=MAX_FD_NUM, width=20, selectmode=tkinter.SINGLE)
-        self.curFd = None
+        self.fdListbox = tkinter.Listbox(self.rt, height=MAX_FD_NUM, width=20, selectmode=tkinter.BROWSE)
+        self.fdListbox.bind('<<ListboxSelect>>', self.onSelect)
 
         # Scrollbar of Flash Canvas frame
         self.scrollbarFlash = tkinter.Scrollbar(self.canvas, command=self.flashCanvas.yview)
@@ -119,7 +120,10 @@ class MainGui:
             self.loadCfgFile = loadCfgFile
 
     def onSelect(self, evt):
-        selFd = self.fdListbox.get(self.fdListbox.curselection()[0])
+        sel = self.fdListbox.curselection()
+        if not sel:
+            return
+        selFd = self.fdListbox.get(sel[0])
         if self.curFd != selFd:
             self.curFd = selFd
             self.buildFlashMap()
@@ -153,7 +157,6 @@ class MainGui:
         self.fdListbox.delete(0, 'end')
         for fd in self.fdDict:
             self.fdListbox.insert('end', fd)
-        self.fdListbox.bind('<<ListboxSelect>>', self.onSelect)
         self.fdListbox.selection_set(0, None)
         self.curFd = self.fdListbox.selection_get()
         self.buildFlashMap()
