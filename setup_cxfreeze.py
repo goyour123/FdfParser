@@ -21,7 +21,7 @@ executables = [
 ]
 
 setup(name='FdVisualizer',
-      version='3.0',
+      version='3.1',
       description='Visualize fdf layout',
       executables=executables,
       options=options
