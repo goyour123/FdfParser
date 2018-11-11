@@ -1,8 +1,11 @@
 import re, os, sys, json
-import tkinter, tkinter.filedialog
+import tkinter, tkinter.filedialog, tkinter.messagebox
 from FdfParser import parse, get_value, dictUpdateJson
+from FdfRestorer import restore, hexFillZero
 
 MAX_FD_NUM = 3
+MIN_SIZE = '0x1000'
+MAX_SIZE = '0x1000000'
 
 def cnvRgnName(rgnDef):
     return re.search(r'[FLASH]+_REGION_(.+)_[A-Z]+', rgnDef).group(1)
@@ -64,6 +67,7 @@ class MainGui:
 
         # Entrybox of flash region size
         self.rgnSizeEntry = tkinter.Entry(self.rt, state='disabled', width=18)
+        self.rgnSizeEntry.bind('<Return>', self.enterSize)
 
         # Label of flash region size
         self.rgnSizeLabel = tkinter.Label(self.rt, width=45, anchor='e')
@@ -98,6 +102,42 @@ class MainGui:
 
     def cbOnConfig(self, evt):
         self.cbInCanvas.configure(scrollregion=self.cbInCanvas.bbox('all'))
+
+    def enterSize(self, evt):
+        if self.rgnSizeEntry.cget('state') == 'disabled':
+            return
+
+        try:
+            newSize = hex(int((self.rgnSizeEntry.get()).upper(), 16))
+        except:
+            tkinter.messagebox.showerror('Error', 'Invalid Value!')
+            self.rgnSizeEntry.delete(0, 'end')
+            self.rgnSizeEntry.insert(0, self.rgnSize.upper())
+            return
+        else:
+            if int(newSize, 16) == int(self.rgnSize, 16):
+                return
+            elif (int(newSize, 16) % int('0x1000', 16) != 0) or int(newSize, 16) > int(MAX_SIZE, 16):
+                tkinter.messagebox.showerror('Error', 'Invalid Value!' )
+                self.rgnSizeEntry.delete(0, 'end')
+                self.rgnSizeEntry.insert(0, self.rgnSize.upper())
+                return
+
+        sLabel = self.rgnSizeLabel.cget('text')
+        for macro in self.macroDict:
+            l = re.search('\S+' + sLabel + '_SIZE', macro)
+            if l:
+                label = l.group(0)
+
+        restore(self.cfgDict, self.switchInused, label, hexFillZero(newSize, 8))
+        self.prsBtnCallback()
+
+        e = tkinter.Event()
+        for w in self.flashFrame.winfo_children():
+            if w.cget('text') == sLabel:
+                e.widget = w
+                break
+        self.rgnButtonCallback(e)
 
     def prsBtnCallback(self):
         self.fdDict, self.macroDict, self.cfgDict, self.switchInused = parse(self.cfgDict)
@@ -184,12 +224,12 @@ class MainGui:
                 elif w.grid_info()['row'] == rgnGridRow + 1:
                     self.preSelRgnEndWidget = w
                     w.configure(bg='#fd5fd5')
-                    rgnSize = hex(int(revDisplayHex(self.preSelRgnEndWidget.cget('text')), 16) - \
+                    self.rgnSize = hex(int(revDisplayHex(self.preSelRgnEndWidget.cget('text')), 16) - \
                                     int(revDisplayHex(self.preSelRgnBaseWidget.cget('text')), 16))[2:]
 
         self.rgnSizeEntry.configure(state='normal')
         self.rgnSizeEntry.delete(0, 'end')
-        self.rgnSizeEntry.insert(0, rgnSize.upper())
+        self.rgnSizeEntry.insert(0, self.rgnSize.upper())
         if not evt.widget.cget('text'):
             self.rgnSizeEntry.configure(state='disabled')
 

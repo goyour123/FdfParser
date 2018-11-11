@@ -34,7 +34,7 @@ def restore(cfgDict, switchInUsed, target, newVal):
                     if_stat = re.findall(r'\s*!if\s+\$\((\S+)\)\s*==\s*(\S+)\s*', line)
                     if if_stat:
                         oprdA, oprdB = if_stat[0]
-                        cond.append(get_cond(get_macro_value(oprdA, config_dict['Switch']), oprdB, '=='))
+                        cond.append(get_cond(get_macro_value(oprdA, switchInUsed), oprdB, '=='))
                 elif statement[0] == 'else':
                     cond[-1] = not cond[-1]
                 elif statement[0] == 'endif':
