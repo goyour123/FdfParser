@@ -117,7 +117,7 @@ class MainGui:
         else:
             if int(newSize, 16) == int(self.rgnSize, 16):
                 return
-            elif (int(newSize, 16) % int('0x1000', 16) != 0) or int(newSize, 16) > int(MAX_SIZE, 16):
+            elif (int(newSize, 16) % int('0x1000', 16) != 0) or int(newSize, 16) > int(MAX_SIZE, 16) or int(newSize, 16) <= 0:
                 tkinter.messagebox.showerror('Error', 'Invalid Value!' )
                 self.rgnSizeEntry.delete(0, 'end')
                 self.rgnSizeEntry.insert(0, self.rgnSize.upper())
