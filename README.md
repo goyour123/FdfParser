@@ -29,4 +29,4 @@ The FdfParser.py is needed to run before running the FdfRestorer.py to generate 
 python FdVisualizer.py
 ````
 ### Windows Execution File
-FdVisualizer.exe [build/exe.win32-3.6/FdVisualizer.exe]
+[FdVisualizer.exe] (build/exe.win32-3.6/FdVisualizer.exe)
