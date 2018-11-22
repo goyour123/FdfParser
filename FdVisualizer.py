@@ -129,6 +129,7 @@ class MainGui:
             if l:
                 label = l.group(0)
 
+        newSize = newSize[0:2] + (newSize[2:]).upper()
         restore(self.cfgDict, self.switchInused, label, hexFillZero(newSize, 8))
         self.prsBtnCallback()
 
