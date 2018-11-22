@@ -265,6 +265,8 @@ def main():
     try:
         with open('config.json', 'r') as f:
             cfgDict = json.load(f)
+            if not os.path.isfile(cfgDict['Fdf']):
+                cfgDict = {}
     except:
         cfgDict = {}
 
