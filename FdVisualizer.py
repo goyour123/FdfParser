@@ -125,9 +125,10 @@ class MainGui:
 
         sLabel = self.rgnSizeLabel.cget('text')
         for macro in self.macroDict:
-            l = re.search('\S+' + sLabel + '_SIZE', macro)
+            l = re.search('[FLASH]+_REGION_' + sLabel + '_SIZE', macro)
             if l:
                 label = l.group(0)
+                break
 
         newSize = newSize[0:2] + (newSize[2:]).upper()
         restore(self.cfgDict, self.switchInused, label, hexFillZero(newSize, 8))
