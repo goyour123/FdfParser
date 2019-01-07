@@ -70,7 +70,7 @@ def dictUpdateJson(jsonFilePath, dictUpdate):
 
 def parse(config_dict):
 
-    fd_info, fd_list, fd_count = {}, [], 0
+    fd_info, fd_list, fd_count, sorted_fd_info = {}, [], 0, {}
     macro_dict, switch_inused = {}, {}
 
     with open(config_dict['Fdf'], 'r') as f:
@@ -147,7 +147,12 @@ def parse(config_dict):
                 # Collect MACROs into a dict
                 macro_dict = update_macro_dict(macro[0], line, macro_dict)
 
-    return fd_info, macro_dict, config_dict, switch_inused
+    # Sorting the region in fd_info
+    for fd in fd_info:
+        print(sorted(fd_info[fd], key=lambda rgn: (get_macro_value(extract_var(rgn[0]), macro_dict))))
+        sorted_fd_info.update({fd: sorted(fd_info[fd], key=lambda rgn: int(get_macro_value(extract_var(rgn[0]), macro_dict), 16))})
+
+    return sorted_fd_info, macro_dict, config_dict, switch_inused
 
 if __name__ == '__main__':
     try:
@@ -176,6 +181,9 @@ if __name__ == '__main__':
 
     # Output the MACRO dict as a JSON file
     # dictUpdateJson('macro.json', macro_dict)
+
+    # Output the FD dict as a JSON file
+    # dictUpdateJson('fd.json', fd_dict)
 
     # Save config_dict into config.json
     dictUpdateJson('config.json', config_dict)
