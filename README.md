@@ -1,4 +1,4 @@
-# FdParser - EDK2 FDF file Parser
+# FdfParser - EDK2 FDF file Parser
 
 ------
 

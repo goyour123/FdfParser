@@ -15,10 +15,10 @@ options = {
 }
 
 executables = [
-    Executable(script='FdVisualizer.py', base=base, icon='.\img\\trilobite.ico')
+    Executable(script='FdfVisualizer.py', base=base, icon='.\img\\trilobite.ico')
 ]
 
-setup(name='FdVisualizer',
+setup(name='FdfVisualizer',
       version='3.2',
       description='Visualize fdf layout',
       executables=executables,
