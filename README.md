@@ -33,14 +33,14 @@ python FdfRestorer.py [MACRO] [Size]
 [MACRO] is the MACRO define in FDF file path and [Size] would be the new MACRO value.
 The FdfParser.py is needed to run before running the FdfRestorer.py to generate the config.json.
 
-## FdVisualizer.py - GUI FDF file Parser
+## FdfVisualizer.py - GUI FDF file Parser
 
 ### Usage
 
 ````bash
-python FdVisualizer.py
+python FdfVisualizer.py
 ````
 
 ### Windows Execution File
 
-[FdVisualizer.exe](build/exe.win32-3.6/FdVisualizer.exe)
+[FdfVisualizer.exe](build/exe.win32-3.6/FdfVisualizer.exe)
