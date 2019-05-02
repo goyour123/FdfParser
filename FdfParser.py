@@ -149,7 +149,6 @@ def parse(config_dict):
 
     # Sorting the region in fd_info
     for fd in fd_info:
-        print(sorted(fd_info[fd], key=lambda rgn: (get_macro_value(extract_var(rgn[0]), macro_dict))))
         sorted_fd_info.update({fd: sorted(fd_info[fd], key=lambda rgn: int(get_macro_value(extract_var(rgn[0]), macro_dict), 16))})
 
     return sorted_fd_info, macro_dict, config_dict, switch_inused

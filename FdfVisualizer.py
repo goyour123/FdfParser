@@ -36,13 +36,13 @@ class MainGui:
         # Menubar
         menubar = tkinter.Menu(self.rt)
         fileMenu = tkinter.Menu(menubar, tearoff=0)
-        fileMenu.add_command(label=" Load file... ", command=self.browser)
+        fileMenu.add_command(label=" Load FDF file... ", command=self.browser)
         menubar.add_cascade(label=" File ", menu=fileMenu)
         self.rt.config(menu=menubar)
 
         # Flash Canvas
         self.canvas = tkinter.Canvas(self.rt)
-        self.flashCanvas = tkinter.Canvas(self.canvas, height=460, width=460)
+        self.flashCanvas = tkinter.Canvas(self.canvas, height=460, width=460, highlightthickness=0)
         self.flashFrame = tkinter.Frame(self.flashCanvas, relief='sunken', bd=2)
         self.flashCanvas.create_window((0, 0), window=self.flashFrame, anchor='nw')
 
@@ -54,7 +54,7 @@ class MainGui:
         self.scrollbarFlash = tkinter.Scrollbar(self.canvas, command=self.flashCanvas.yview)
 
         # Button of parsing file
-        self.prsBtn = tkinter.Button(self.rt, text='Parse', command=self.prsBtnCallback, height=3, width=10, state=tkinter.DISABLED)
+        self.prsBtn = tkinter.Button(self.rt, text='Parse', command=self.prsBtnCallback, height=3, width=10, state=tkinter.DISABLED, cursor='arrow')
 
         # Canvas of checkbutton
         self.cbCanvas = tkinter.Canvas(self.rt)
@@ -95,7 +95,7 @@ class MainGui:
             self.fdDict, self.macroDict, self.cfgDict, self.switchInused = parse(self.cfgDict)
             self.cr8FdListbox()
             self.cr8DynCheckbtn()
-            self.prsBtn.configure(state=tkinter.NORMAL)
+            self.prsBtn.configure(state=tkinter.NORMAL, cursor='spider')
 
     def flashOnConfig(self, evt):
         self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
@@ -158,7 +158,7 @@ class MainGui:
             self.fdDict, self.macroDict, self.cfgDict, self.switchInused = parse(self.cfgDict)
             self.cr8FdListbox()
             self.cr8DynCheckbtn()
-            self.prsBtn.configure(state=tkinter.NORMAL)
+            self.prsBtn.configure(state=tkinter.NORMAL, cursor='spider')
             self.loadCfgFile = loadCfgFile
 
     def onSelect(self, evt):
@@ -216,6 +216,7 @@ class MainGui:
 
         # Configure the selected label's backgroundcolor
         evt.widget.configure(bg='#34d100')
+        evt.widget.focus_set()
         rgnGridRow = evt.widget.grid_info()['row']
 
         for w in self.flashFrame.winfo_children():
