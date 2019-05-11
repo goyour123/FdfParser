@@ -71,7 +71,7 @@ def dictUpdateJson(jsonFilePath, dictUpdate):
 def parse(config_dict):
 
     fd_info, fd_list, fd_count, sorted_fd_info = {}, [], 0, {}
-    macro_dict, switch_inused = {}, {}
+    macro_dict, switch_inused, pcd_dict = {}, {}, {}
 
     with open(config_dict['Fdf'], 'r') as f:
 
@@ -123,6 +123,12 @@ def parse(config_dict):
                         cond_nest.append(get_cond(get_macro_value(oprda, config_dict['Switch']), oprdb, '=='))
                         switch_inused.update({oprda: config_dict['Switch'][oprda]})
                     elif len(if_stat_pcd) > 0:
+                        # Collect PCDs
+                        oprda = if_stat_pcd[0]
+                        try:
+                            pcd_dict[oprda]
+                        except KeyError:
+                            pcd_dict[oprda] = False
                         # No parsing for PCD switch
                         cond_nest.append(False)
                     else:
