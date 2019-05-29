@@ -1,5 +1,6 @@
 import sys, os
 import re, json
+from warnings import warn
 
 def get_cond(oprda, oprdb, optr):
     if optr == '==':
@@ -154,8 +155,12 @@ def parse(config_dict):
                 macro_dict = update_macro_dict(macro[0], line, macro_dict)
 
     # Sorting the region in fd_info
-    for fd in fd_info:
-        sorted_fd_info.update({fd: sorted(fd_info[fd], key=lambda rgn: int(get_macro_value(extract_var(rgn[0]), macro_dict), 16))})
+    if macro_dict:
+        for fd in fd_info:
+            sorted_fd_info.update({fd: sorted(fd_info[fd], key=lambda rgn: int(get_macro_value(extract_var(rgn[0]), macro_dict), 16))})
+    else:
+        warn('The macro_dict is empty.')
+        warn('No MACRO define was found in this condition.')
 
     return sorted_fd_info, macro_dict, config_dict, switch_inused
 

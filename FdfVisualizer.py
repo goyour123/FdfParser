@@ -1,5 +1,6 @@
 import re, os, sys, json
 import tkinter, tkinter.filedialog, tkinter.messagebox
+from warnings import warn
 from FdfParser import parse, get_value, dictUpdateJson
 from FdfRestorer import restore, hexFillZero
 
@@ -197,13 +198,16 @@ class MainGui:
 
     def cr8FdListbox(self):
         self.fdListbox.delete(0, 'end')
-        for fd in self.fdDict:
-            self.fdListbox.insert('end', fd)
-        self.fdListbox.selection_set(0, None)
-        self.curFd = self.fdListbox.selection_get()
-        self.buildFlashMap()
-        self.flashFrame.update_idletasks()
-        self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
+        if self.fdDict:
+            for fd in self.fdDict:
+                self.fdListbox.insert('end', fd)
+            self.fdListbox.selection_set(0, None)
+            self.curFd = self.fdListbox.selection_get()
+            self.buildFlashMap()
+            self.flashFrame.update_idletasks()
+            self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
+        else:
+            warn('The fdDict is empty')
 
     def rgnButtonCallback(self, evt):
         # Restore the previous selected label's background color
