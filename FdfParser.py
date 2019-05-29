@@ -81,7 +81,7 @@ def parse(config_dict):
         for line in f:
 
             # Filter the comments
-            if line.split('#')[0] == '':
+            if line.split('#')[0] == '' or line == '\n':
                 continue
             else:
                 line = line.split('#')[0]
