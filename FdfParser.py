@@ -77,7 +77,7 @@ def parse(config_dict):
     with open(config_dict['Fdf'], 'r') as f:
 
         cond_nest = []
-        fd_cond, fv_cond = False, False
+        fd_cond, ign_cond = False, True
 
         for line in f:
 
@@ -87,26 +87,25 @@ def parse(config_dict):
             else:
                 line = line.split('#')[0]
 
-            sect = re.findall(r'\[(\S+)\.(\S+)\]', line)
-            macro = re.findall(r'\s*DEFINE\s+([^\s=]+)', line)
-            statement = re.findall(r'\s*!(\S+)\s+', line)
-
+            sect = re.findall(r'\[(\S+)\]', line)
             # Check what section is under parsing
             if len(sect) > 0:
-                sect_type, name = sect[0]
-                if (sect_type == 'FD'):
-                    fd_cond, fv_cond= True, False
-                    fd_list.append(name)
+                sect_type = sect[0].split('.')
+                if (sect_type[0] == 'FD'):
+                    fd_cond, ign_cond= True, False
+                    fd_list.append(sect_type[1])
                     fd_count += 1
                     fd_info[fd_list[fd_count-1]] = []
-                elif (sect_type == 'FV'):
-                    fd_cond, fv_cond = False, True
+                elif (sect_type[0] == 'Defines'):
+                    fd_cond, ign_cond = False, False
                 else:
-                    fd_cond, fv_cond = False, False
-
-            if fv_cond:
+                    ign_cond = True
                 continue
 
+            if ign_cond:
+                continue
+
+            statement = re.findall(r'\s*!(\S+)\s+', line)
             if len(statement) > 0:
                 if statement[0] == 'if':
                     if_stat = re.findall(r'\s*!if\s+\$\((\S+)\)\s*==\s*(\S+)\s*', line)
@@ -140,6 +139,7 @@ def parse(config_dict):
                     cond_nest[-1] = not cond_nest[-1]
                 elif statement[0] == 'endif':
                     cond_nest.pop(-1)
+                continue
 
             # Skip parsing if the condition is not match
             if False in cond_nest:
@@ -149,7 +149,9 @@ def parse(config_dict):
                 region = re.findall(r'([\$0].+)\|([\$0].+)', line)
                 if len(region) > 0:
                     fd_info[fd_list[fd_count-1]].append(region[0])
+                    continue
 
+            macro = re.findall(r'\s*DEFINE\s+([^\s=]+)', line)
             if len(macro) > 0:
                 # Collect MACROs into a dict
                 macro_dict = update_macro_dict(macro[0], line, macro_dict)

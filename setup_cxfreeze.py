@@ -10,7 +10,8 @@ if sys.platform == 'win32':
 
 options = {
     'build_exe': {
-        'include_files': [sys.exec_prefix + r'\DLLs\tk86t.dll', sys.exec_prefix + r'\DLLs\tcl86t.dll', '.\img']
+        'include_files': [sys.exec_prefix + r'\DLLs\tk86t.dll', sys.exec_prefix + r'\DLLs\tcl86t.dll', '.\img'],
+        'excludes': ['email', 'xml', 'http', 'urllib']
     }
 }
 
