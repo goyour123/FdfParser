@@ -1,7 +1,7 @@
 import re, os, sys, json
 import tkinter, tkinter.filedialog, tkinter.messagebox
 from warnings import warn
-from FdfParser import parse, get_value, dictUpdateJson
+from FdfParser import parse, get_value, dictUpdateJson, export
 from FdfRestorer import restore, hexFillZero
 
 MAX_FD_NUM = 3
@@ -36,9 +36,10 @@ class MainGui:
 
         # Menubar
         menubar = tkinter.Menu(self.rt)
-        fileMenu = tkinter.Menu(menubar, tearoff=0)
-        fileMenu.add_command(label=" Load FDF file... ", command=self.browser)
-        menubar.add_cascade(label=" File ", menu=fileMenu)
+        self.fileMenu = tkinter.Menu(menubar, tearoff=0)
+        self.fileMenu.add_command(label=" Load FDF file... ", command=self.browser)
+        self.fileMenu.add_command(label=" Export ", command=self.exportCallback, state=tkinter.DISABLED)
+        menubar.add_cascade(label=" File ", menu=self.fileMenu)
         self.rt.config(menu=menubar)
 
         # Flash Canvas
@@ -97,6 +98,7 @@ class MainGui:
             self.cr8FdListbox()
             self.cr8DynCheckbtn()
             self.prsBtn.configure(state=tkinter.NORMAL, cursor='spider')
+            self.fileMenu.entryconfigure(' Export ', state=tkinter.NORMAL)
 
     def flashOnConfig(self, evt):
         self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
@@ -153,14 +155,23 @@ class MainGui:
             initDir = os.path.dirname(self.cfgDict['Fdf'])
         else:
             initDir = os.getcwd()
-        loadCfgFile = tkinter.filedialog.askopenfile(title='Browse source path', initialdir=initDir, filetypes=[("fdf", "*.fdf")])
+        loadCfgFile = tkinter.filedialog.askopenfile(title='Browse source path', initialdir=initDir, filetypes=[("Flash Description File", "*.fdf")])
         if loadCfgFile:
             self.cfgDict.update({'Fdf': loadCfgFile.name})
             self.sortedfdDict, self.macroDict, self.cfgDict, self.switchInused, self.fdInfo = parse(self.cfgDict)
             self.cr8FdListbox()
             self.cr8DynCheckbtn()
             self.prsBtn.configure(state=tkinter.NORMAL, cursor='spider')
+            self.fileMenu.entryconfigure(' Export ', state=tkinter.NORMAL)
             self.loadCfgFile = loadCfgFile
+
+    def exportCallback(self):
+        if 'Fdf' in self.cfgDict:
+            initDir = os.path.dirname(self.cfgDict['Fdf'])
+        else:
+            initDir = os.getcwd()
+        exportFile = tkinter.filedialog.asksaveasfile(defaultextension='.txt', title='Export to', initialdir=initDir, filetypes=[("Text Document", "*.txt")])
+        export(exportFile.name, self.cfgDict['Fdf'], self.sortedfdDict, self.macroDict)
 
     def onSelect(self, evt):
         sel = self.fdListbox.curselection()

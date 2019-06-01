@@ -70,7 +70,7 @@ def dictUpdateJson(jsonFilePath, dictUpdate):
             j.write(json.dumps(dictUpdate, indent = 4))
 
 def export(export_file_path, fdf_file_path, fd_dict, macro_dict):
-    with open('region.txt', 'w') as f:
+    with open(export_file_path, 'w') as f:
         f.writelines('----------------\nParsed File Path: ' + fdf_file_path + '\n----------------\n\n')
         for fd in fd_dict:
             f.writelines(fd + ' Offset|Size\n')
