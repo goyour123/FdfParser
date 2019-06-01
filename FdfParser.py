@@ -69,6 +69,18 @@ def dictUpdateJson(jsonFilePath, dictUpdate):
         with open (jsonFilePath, 'w') as j:
             j.write(json.dumps(dictUpdate, indent = 4))
 
+def export(export_file_path, fdf_file_path, fd_dict, macro_dict):
+    with open('region.txt', 'w') as f:
+        f.writelines('----------------\nParsed File Path: ' + fdf_file_path + '\n----------------\n\n')
+        for fd in fd_dict:
+            f.writelines(fd + ' Offset|Size\n')
+            for region_offset, region_size in fd_dict[fd]:
+                offset_macro, size_macro = extract_var(region_offset), extract_var(region_size)
+                if int(get_macro_value(size_macro, macro_dict), base=16) == 0:
+                    continue
+                f.writelines(region_offset + '|' + region_size + ' ' + get_macro_value(offset_macro, macro_dict) + '|' + get_macro_value(size_macro, macro_dict) +'\n')
+            f.writelines('\n')
+
 def parse(config_dict):
 
     fd_info, fd_list, fd_count, sorted_fd_info = {}, [], 0, {}
@@ -178,16 +190,23 @@ if __name__ == '__main__':
                 except KeyError:
                     sys.exit()
                 else:
-                    fdfPath = config_dict['Fdf']
+                    if not os.path.isfile(config_dict['Fdf']):
+                        sys.exit()
         else:
             sys.exit()
     else:
         if os.path.isfile('config.json'):
-            with open('config.json', 'r') as config_f:
-                config_dict = json.load(config_f)
-                config_dict.update({'Fdf': sys.argv[1]})
+            if os.path.isfile(sys.argv[1]):
+                with open('config.json', 'r') as config_f:
+                    config_dict = json.load(config_f)
+                    config_dict.update({'Fdf': os.path.abspath(sys.argv[1])})
+            else:
+                sys.exit()
         else:
-            config_dict = {'Fdf': sys.argv[1]}
+            if os.path.isfile(sys.argv[1]):
+                config_dict = {'Fdf': os.path.abspath(sys.argv[1])}
+            else:
+                sys.exit()
 
     sorted_fd_dict, macro_dict, config_dict, switch_inused, fd_info = parse(config_dict)
 
@@ -200,14 +219,5 @@ if __name__ == '__main__':
     # Save config_dict into config.json
     dictUpdateJson('config.json', config_dict)
 
-    # Create Region file
-    with open('region.txt', 'w') as f:
-        f.writelines('----------------\nParsed File Path: ' + config_dict['Fdf'] + '\n----------------\n\n')
-        for fd in sorted_fd_dict:
-            f.writelines(fd + ' Offset|Size\n')
-            for region_offset, region_size in sorted_fd_dict[fd]:
-                offset_macro, size_macro = extract_var(region_offset), extract_var(region_size)
-                if int(get_macro_value(size_macro, macro_dict), base=16) == 0:
-                    continue
-                f.writelines(region_offset + '|' + region_size + ' ' + get_macro_value(offset_macro, macro_dict) + '|' + get_macro_value(size_macro, macro_dict) +'\n')
-            f.writelines('\n')
+    # Export Region file
+    export('region.txt', config_dict['Fdf'], sorted_fd_dict, macro_dict)
