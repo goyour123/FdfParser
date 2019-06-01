@@ -164,7 +164,7 @@ def parse(config_dict):
         warn('The macro_dict is empty.')
         warn('No MACRO define was found in this condition.')
 
-    return sorted_fd_info, macro_dict, config_dict, switch_inused
+    return sorted_fd_info, macro_dict, config_dict, switch_inused, fd_info
 
 if __name__ == '__main__':
     try:
@@ -189,13 +189,13 @@ if __name__ == '__main__':
         else:
             config_dict = {'Fdf': sys.argv[1]}
 
-    fd_dict, macro_dict, config_dict, switch_inused = parse(config_dict)
+    sorted_fd_dict, macro_dict, config_dict, switch_inused, fd_info = parse(config_dict)
 
     # Output the MACRO dict as a JSON file
     # dictUpdateJson('macro.json', macro_dict)
 
     # Output the FD dict as a JSON file
-    # dictUpdateJson('fd.json', fd_dict)
+    # dictUpdateJson('fd.json', sorted_fd_dict)
 
     # Save config_dict into config.json
     dictUpdateJson('config.json', config_dict)
@@ -203,9 +203,9 @@ if __name__ == '__main__':
     # Create Region file
     with open('region.txt', 'w') as f:
         f.writelines('----------------\nParsed File Path: ' + config_dict['Fdf'] + '\n----------------\n\n')
-        for fd in fd_dict:
+        for fd in sorted_fd_dict:
             f.writelines(fd + ' Offset|Size\n')
-            for region_offset, region_size in fd_dict[fd]:
+            for region_offset, region_size in sorted_fd_dict[fd]:
                 offset_macro, size_macro = extract_var(region_offset), extract_var(region_size)
                 if int(get_macro_value(size_macro, macro_dict), base=16) == 0:
                     continue

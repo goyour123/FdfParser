@@ -93,7 +93,7 @@ class MainGui:
         self.cbInCanvas.bind('<Configure>', self.cbOnConfig)
 
         if 'Fdf' in cfgDict:
-            self.fdDict, self.macroDict, self.cfgDict, self.switchInused = parse(self.cfgDict)
+            self.sortedfdDict, self.macroDict, self.cfgDict, self.switchInused, self.fdInfo = parse(self.cfgDict)
             self.cr8FdListbox()
             self.cr8DynCheckbtn()
             self.prsBtn.configure(state=tkinter.NORMAL, cursor='spider')
@@ -143,7 +143,7 @@ class MainGui:
         self.rgnButtonCallback(e)
 
     def prsBtnCallback(self):
-        self.fdDict, self.macroDict, self.cfgDict, self.switchInused = parse(self.cfgDict)
+        self.sortedfdDict, self.macroDict, self.cfgDict, self.switchInused, self.fdInfo = parse(self.cfgDict)
         self.buildFlashMap()
         self.flashFrame.update_idletasks()
         self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
@@ -156,7 +156,7 @@ class MainGui:
         loadCfgFile = tkinter.filedialog.askopenfile(title='Browse source path', initialdir=initDir, filetypes=[("fdf", "*.fdf")])
         if loadCfgFile:
             self.cfgDict.update({'Fdf': loadCfgFile.name})
-            self.fdDict, self.macroDict, self.cfgDict, self.switchInused = parse(self.cfgDict)
+            self.sortedfdDict, self.macroDict, self.cfgDict, self.switchInused, self.fdInfo = parse(self.cfgDict)
             self.cr8FdListbox()
             self.cr8DynCheckbtn()
             self.prsBtn.configure(state=tkinter.NORMAL, cursor='spider')
@@ -198,16 +198,20 @@ class MainGui:
 
     def cr8FdListbox(self):
         self.fdListbox.delete(0, 'end')
-        if self.fdDict:
-            for fd in self.fdDict:
+        if self.sortedfdDict:
+            for fd in self.sortedfdDict:
                 self.fdListbox.insert('end', fd)
             self.fdListbox.selection_set(0, None)
             self.curFd = self.fdListbox.selection_get()
             self.buildFlashMap()
             self.flashFrame.update_idletasks()
             self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
+        elif self.fdInfo:
+            warn('The sortedfdDict is empty. Use fdInfo instead.')
+            for fd in self.fdInfo:
+                self.fdListbox.insert('end', fd)
         else:
-            warn('The fdDict is empty')
+            warn('No FD infomation was found.')
 
     def rgnButtonCallback(self, evt):
         # Restore the previous selected label's background color
@@ -245,6 +249,7 @@ class MainGui:
     def buildFlashMap(self):
         fdOffset, nulBlk, rgnLabel = 0, 0, None
         labelHeight = None
+        fdDict = self.sortedfdDict
 
         for w in self.flashFrame.winfo_children():
             self.preSelRgnWidget, self.preSelRgnColor, self.preSelRgnBaseWidget, self.preSelRgnEndWidget = None, None, None, None
@@ -253,7 +258,7 @@ class MainGui:
             self.rgnSizeLabel.configure(text='')
             w.destroy()
 
-        for idx, rgn in enumerate(self.fdDict[self.curFd]):
+        for idx, rgn in enumerate(fdDict[self.curFd]):
             rgnOffset, rgnSize = get_value(rgn[0], self.macroDict), get_value(rgn[1], self.macroDict)
             if fdOffset < rgnOffset:
                 rgnLabel = tkinter.Label(self.flashFrame, text="", relief='ridge', bg='gray'+ str(6 + ((idx + nulBlk) % 2) * 2) +'1', bd=2, width=50, height=labelHeight)

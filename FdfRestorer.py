@@ -66,7 +66,7 @@ if __name__ == '__main__':
         print('config.json file not exist!')
         sys.exit()
 
-    _ign, macroDict, config_dict, switchInused = parse(config_dict)
+    _ign, macroDict, config_dict, switchInused, fd_info = parse(config_dict)
     
     if sys.argv[1] not in macroDict:
         print('Macro not found!')
