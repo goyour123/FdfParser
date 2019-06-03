@@ -1,15 +1,12 @@
 import re, os, sys, json
 import tkinter, tkinter.filedialog, tkinter.messagebox
 from warnings import warn
-from FdfParser import parse, get_value, dictUpdateJson, export
+from FdfParser import parse, get_value, dictUpdateJson, export, cnvRgnName
 from FdfRestorer import restore, hexFillZero
 
 MAX_FD_NUM = 3
 MIN_SIZE = '0x1000'
 MAX_SIZE = '0x1000000'
-
-def cnvRgnName(rgnDef):
-    return re.search(r'[FLASH]+_REGION_(.+)_[A-Z]+', rgnDef).group(1)
 
 def getJsnKey(jsnPath, key):
     try:

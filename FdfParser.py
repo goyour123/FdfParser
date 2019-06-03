@@ -69,16 +69,39 @@ def dictUpdateJson(jsonFilePath, dictUpdate):
         with open (jsonFilePath, 'w') as j:
             j.write(json.dumps(dictUpdate, indent = 4))
 
+def cnvRgnName(rgnDef):
+    return re.search(r'[FLASH]+_REGION_(.+)_[A-Z]+', rgnDef).group(1)
+
+def setOutputHex(h):
+    return h[0:2] + (h[2:].zfill(8)).upper()
+
+def charPrinter(char, text, length):
+    frontDashNum = round(length/2) - round(len(text)/2)
+    backDashNum = length - round(length/2) - (len(text) - round(len(text)/2))
+    return char * frontDashNum + text + char * backDashNum
+
 def export(export_file_path, fdf_file_path, fd_dict, macro_dict):
+    width = 61
     with open(export_file_path, 'w') as f:
         f.writelines('----------------\nParsed File Path: ' + fdf_file_path + '\n----------------\n\n')
         for fd in fd_dict:
-            f.writelines(fd + ' Offset|Size\n')
-            for region_offset, region_size in fd_dict[fd]:
+            pre_offset = None
+            f.writelines('[FD.' + fd + ']\n')
+            f.writelines('# |' + charPrinter('-', ' ' + fd + ' layuot ', width) + '|\n')
+            for region_offset, region_size in reversed(fd_dict[fd]):
                 offset_macro, size_macro = extract_var(region_offset), extract_var(region_size)
                 if int(get_macro_value(size_macro, macro_dict), base=16) == 0:
                     continue
-                f.writelines(region_offset + '|' + region_size + ' ' + get_macro_value(offset_macro, macro_dict) + '|' + get_macro_value(size_macro, macro_dict) +'\n')
+                offset = int(get_macro_value(offset_macro, macro_dict), 16) + int(get_macro_value(size_macro, macro_dict), 16)
+                if pre_offset and pre_offset != offset:
+                    f.writelines('# |' + charPrinter('-', '', width) + '| ' + setOutputHex(hex(pre_offset)) + '\n')
+                    f.writelines('# |' + charPrinter(' ', '', width) + '| ' + '\n')
+                pre_offset = int(get_macro_value(offset_macro, macro_dict), 16)
+
+                f.writelines('# |' + charPrinter('-', '', width) + '| ' + setOutputHex(hex(offset)) + '\n')
+                f.writelines('# |' + charPrinter(' ', cnvRgnName(region_offset), width) + '| ' + '\n')
+                if (int(get_macro_value(offset_macro, macro_dict), 16) == 0):
+                    f.writelines('# |' + charPrinter('-', '', width) + '| ' + setOutputHex(get_macro_value(offset_macro, macro_dict)) + '\n')
             f.writelines('\n')
 
 def parse(config_dict):
