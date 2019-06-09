@@ -32,9 +32,15 @@ def restore(cfgDict, switchInUsed, target, newVal):
             if statement:
                 if statement[0] == 'if':
                     if_stat = re.findall(r'\s*!if\s+\$\((\S+)\)\s*==\s*(\S+)\s*', line)
+                    if_stat_pcd = re.findall(r'\s*!if\s+([a-zA-Z0-9]+\.[a-zA-Z0-9]+)\s*', line)
                     if if_stat:
                         oprdA, oprdB = if_stat[0]
                         cond.append(get_cond(get_macro_value(oprdA, switchInUsed), oprdB, '=='))
+                    elif if_stat_pcd:
+                        oprdA = if_stat_pcd[0]
+                        cond.append(False)
+                    else:
+                        cond.append(False)
                 elif statement[0] == 'else':
                     cond[-1] = not cond[-1]
                 elif statement[0] == 'endif':
