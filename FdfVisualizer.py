@@ -17,7 +17,7 @@ def getJsnKey(jsnPath, key):
         return None
 
 def setDisplayHex(h):
-    return '0x' + ((h[2:].zfill(7))[0:3] + '_' + (h[2:].zfill(7))[3:7]).upper()
+    return h[0:2] + ((h[2:].zfill(7))[0:3] + '_' + (h[2:].zfill(7))[3:7]).upper()
 
 def revDisplayHex(s):
     return s.replace('_', '')
@@ -266,20 +266,21 @@ class MainGui:
             self.rgnSizeLabel.configure(text='')
             w.destroy()
 
-        for idx, rgn in enumerate(fdDict[self.curFd]):
-            rgnOffset, rgnSize = get_value(rgn[0], self.macroDict), get_value(rgn[1], self.macroDict)
-            if fdOffset < rgnOffset:
-                rgnLabel = tkinter.Label(self.flashFrame, text="", relief='ridge', bg='gray'+ str(6 + ((idx + nulBlk) % 2) * 2) +'1', bd=2, width=50, height=labelHeight)
+        if fdDict:
+            for idx, rgn in enumerate(fdDict[self.curFd]):
+                rgnOffset, rgnSize = get_value(rgn[0], self.macroDict), get_value(rgn[1], self.macroDict)
+                if fdOffset < rgnOffset:
+                    rgnLabel = tkinter.Label(self.flashFrame, text="", relief='ridge', bg='gray'+ str(6 + ((idx + nulBlk) % 2) * 2) +'1', bd=2, width=50, height=labelHeight)
+                    rgnLabel.grid(row=idx + nulBlk, column=0, rowspan=2, columnspan=1, padx=8)
+                    rgnLabel.bind('<Button-1>', self.rgnButtonCallback)
+                    tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset)), height=labelHeight, width=9).grid(row=idx + nulBlk, column=1, rowspan=1, columnspan=1, sticky='w')
+                    nulBlk += 1
+                rgnLabel = tkinter.Label(self.flashFrame, text=cnvRgnName(rgn[0]), relief='ridge', bg='gray'+ str(6 + ((idx + nulBlk) % 2) * 2) +'1', bd=2, width=50, height=labelHeight)
                 rgnLabel.grid(row=idx + nulBlk, column=0, rowspan=2, columnspan=1, padx=8)
                 rgnLabel.bind('<Button-1>', self.rgnButtonCallback)
-                tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset)), height=labelHeight, width=9).grid(row=idx + nulBlk, column=1, rowspan=1, columnspan=1, sticky='w')
-                nulBlk += 1
-            rgnLabel = tkinter.Label(self.flashFrame, text=cnvRgnName(rgn[0]), relief='ridge', bg='gray'+ str(6 + ((idx + nulBlk) % 2) * 2) +'1', bd=2, width=50, height=labelHeight)
-            rgnLabel.grid(row=idx + nulBlk, column=0, rowspan=2, columnspan=1, padx=8)
-            rgnLabel.bind('<Button-1>', self.rgnButtonCallback)
-            tkinter.Label(self.flashFrame, text=setDisplayHex(hex(rgnOffset)), height=labelHeight, width=9).grid(row=idx + nulBlk, column=1, rowspan=1, columnspan=1, sticky='w')
-            fdOffset = rgnOffset + rgnSize
-        tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset)), height=labelHeight, width=9).grid(row=idx + nulBlk + 1, column=1, rowspan=1, columnspan=1, sticky='w')
+                tkinter.Label(self.flashFrame, text=setDisplayHex(hex(rgnOffset)), height=labelHeight, width=9).grid(row=idx + nulBlk, column=1, rowspan=1, columnspan=1, sticky='w')
+                fdOffset = rgnOffset + rgnSize
+            tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset)), height=labelHeight, width=9).grid(row=idx + nulBlk + 1, column=1, rowspan=1, columnspan=1, sticky='w')
 
 def main():
     try:

@@ -17,45 +17,54 @@ def extract_var(string):
         return None
 
 def get_macro_value(macro, macro_dict):
-    val = macro_dict[macro]
     try:
-        int(val, base=16)
-    except:
-        pass
+        int(macro_dict[macro], 16)
+    except ValueError:
+        val = macro_dict[macro]
+    except KeyError:
+        val = None
     else:
-        val = hex(int(val, base=16))
-
+        val = hex(int(macro_dict[macro], 16))
     return val
 
 def get_value(var, macro_dict):
     try:
         int(var, base=16)
     except ValueError:
-        return int(get_macro_value(extract_var(var), macro_dict), base=16)
+        if get_macro_value(extract_var(var), macro_dict):
+            return int(get_macro_value(extract_var(var), macro_dict), base=16)
+        else:
+            return None
     else:
         return int(var, base=16)
 
-def update_macro_dict(key, line, dict):
+def update_macro_dict(key, line, macro_dict):
     oprd = re.findall(r'\s*[\+\-\*/=]\s*([^\+\-\*\/\n\s#]+)', line)
     operator = re.findall(r'([\+\-\*/])', line)
 
     # Set the first operand as the initial result value
-    result = get_value(oprd[0], dict)
+    if type(get_value(oprd[0], macro_dict)) != type(None):
+        result = get_value(oprd[0], macro_dict)
+    else:
+        return macro_dict, line
 
     if len(operator) > 0:
         for idx, optr in enumerate(operator):
-            val = get_value(oprd[idx + 1], dict)
-            if (optr == '+'):
-                result += val
-            elif (optr == '-'):
-                result -= val
-            elif (optr == '*'):
-                result *= val
-            elif (optr == '/'):
-                result /= val
+            if type(get_value(oprd[idx + 1], macro_dict)) != type(None):
+                val = get_value(oprd[idx + 1], macro_dict)
+                if (optr == '+'):
+                    result += val
+                elif (optr == '-'):
+                    result -= val
+                elif (optr == '*'):
+                    result *= val
+                elif (optr == '/'):
+                    result /= val
+            else:
+                return macro_dict, line
 
-    dict[key] = hex(int(result))
-    return dict
+    macro_dict[key] = hex(int(result))
+    return macro_dict, None
 
 def dictUpdateJson(jsonFilePath, dictUpdate):
     if os.path.isfile(jsonFilePath):
@@ -107,7 +116,7 @@ def export(export_file_path, fdf_file_path, fd_dict, macro_dict):
 def parse(config_dict):
 
     fd_info, fd_list, fd_count, sorted_fd_info = {}, [], 0, {}
-    macro_dict, switch_inused, pcd_dict = {}, {}, {}
+    macro_dict, switch_inused, pcd_dict, pending_lines = {}, {}, {}, []
 
     with open(config_dict['Fdf'], 'r') as f:
 
@@ -189,7 +198,17 @@ def parse(config_dict):
             macro = re.findall(r'\s*DEFINE\s+([^\s=]+)', line)
             if len(macro) > 0:
                 # Collect MACROs into a dict
-                macro_dict = update_macro_dict(macro[0], line, macro_dict)
+                macro_dict, pending = update_macro_dict(macro[0], line, macro_dict)
+                if pending:
+                    pending_lines.append(pending)
+                elif pending_lines:
+                    temp_pl_list = []
+                    for pl in pending_lines:
+                        pl_macro = re.findall(r'\s*DEFINE\s+([^\s=]+)', pl)
+                        macro_dict, pending = update_macro_dict(pl_macro[0], pl, macro_dict)
+                        if pending:
+                            temp_pl_list.append(pl)
+                    pending_lines = temp_pl_list
 
     # Sorting the region in fd_info
     if macro_dict:
