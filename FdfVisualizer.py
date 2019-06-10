@@ -206,20 +206,14 @@ class MainGui:
 
     def cr8FdListbox(self):
         self.fdListbox.delete(0, 'end')
-        if self.sortedfdDict:
-            for fd in self.sortedfdDict:
-                self.fdListbox.insert('end', fd)
-            self.fdListbox.selection_set(0, None)
-            self.curFd = self.fdListbox.selection_get()
-            self.buildFlashMap()
-            self.flashFrame.update_idletasks()
-            self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
-        elif self.fdInfo:
-            warn('The sortedfdDict is empty. Use fdInfo instead.')
-            for fd in self.fdInfo:
-                self.fdListbox.insert('end', fd)
-        else:
-            warn('No FD infomation was found.')
+        fdDict = self.sortedfdDict if self.sortedfdDict else self.fdInfo
+        for fd in fdDict:
+            self.fdListbox.insert('end', fd)
+        self.fdListbox.selection_set(0, None)
+        self.curFd = self.fdListbox.selection_get()
+        self.buildFlashMap()
+        self.flashFrame.update_idletasks()
+        self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
 
     def rgnButtonCallback(self, evt):
         # Restore the previous selected label's background color
