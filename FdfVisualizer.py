@@ -92,8 +92,8 @@ class MainGui:
 
         if 'Fdf' in cfgDict:
             self.sortedfdDict, self.macroDict, self.cfgDict, self.switchInused, self.fdInfo = parse(self.cfgDict)
-            self.cr8FdListbox()
             self.cr8DynCheckbtn()
+            self.cr8FdListbox()
             self.prsBtn.configure(state=tkinter.NORMAL, cursor='spider')
             self.fileMenu.entryconfigure(' Export ', state=tkinter.NORMAL)
 
@@ -156,8 +156,8 @@ class MainGui:
         if loadCfgFile:
             self.cfgDict.update({'Fdf': loadCfgFile.name})
             self.sortedfdDict, self.macroDict, self.cfgDict, self.switchInused, self.fdInfo = parse(self.cfgDict)
-            self.cr8FdListbox()
             self.cr8DynCheckbtn()
+            self.cr8FdListbox()
             self.prsBtn.configure(state=tkinter.NORMAL, cursor='spider')
             self.fileMenu.entryconfigure(' Export ', state=tkinter.NORMAL)
             self.loadCfgFile = loadCfgFile
