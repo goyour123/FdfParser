@@ -14,7 +14,12 @@ def extract_var(string):
     if len(var) > 0:
         return var[0]
     else:
-        return None
+        try:
+            int(string, 16)
+        except:
+            return None
+        else:
+            return string
 
 def get_macro_value(macro, macro_dict):
     try:
@@ -22,7 +27,12 @@ def get_macro_value(macro, macro_dict):
     except ValueError:
         val = macro_dict[macro]
     except KeyError:
-        val = None
+        try:
+            int(macro, 16)
+        except:
+            val = None
+        else:
+            val = macro
     else:
         val = hex(int(macro_dict[macro], 16))
     return val
