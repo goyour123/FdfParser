@@ -181,6 +181,35 @@ def parse(config_dict):
 
                 elif statement[0] == 'else':
                     cond_nest[-1] = not cond_nest[-1]
+
+                elif statement[0] == 'elseif':
+                    elif_stat = re.findall(r'\s*!elseif\s+\$\((\S+)\)\s*==\s*(\S+)\s*', line)
+                    elif_stat_pcd = re.findall(r'\s*!elseif\s+([a-zA-Z0-9]+\.[a-zA-Z0-9]+)\s*', line)
+                    if len(elif_stat) > 0:
+                        oprda, oprdb = elif_stat[0]
+                        try:
+                            config_dict['Switch'][oprda]
+                        except KeyError:
+                            # If the switch condition is not existed in config_dict, add and set it to NO
+                            if 'Switch' not in config_dict:
+                                config_dict.update({'Switch': {oprda: 'NO'}})
+                            else:
+                                config_dict['Switch'][oprda] = 'NO'
+                        cond_nest.append(get_cond(get_macro_value(oprda, config_dict['Switch']), oprdb, '=='))
+                        switch_inused.update({oprda: config_dict['Switch'][oprda]})
+                    elif len(elif_stat_pcd) > 0:
+                        # Collect PCDs
+                        oprda = elif_stat_pcd[0]
+                        try:
+                            pcd_dict[oprda]
+                        except KeyError:
+                            pcd_dict[oprda] = False
+                        # No parsing for PCD switch
+                        cond_nest.append(False)
+                    else:
+                        # No parsing for unknown case
+                        cond_nest.append(False)
+
                 elif statement[0] == 'endif':
                     cond_nest.pop(-1)
                 continue
