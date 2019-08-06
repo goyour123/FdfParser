@@ -89,7 +89,12 @@ def dictUpdateJson(jsonFilePath, dictUpdate):
             j.write(json.dumps(dictUpdate, indent = 4))
 
 def cnvRgnName(rgnDef):
-    return re.search(r'[FLASH]+_REGION_(.+)_[A-Z]+', rgnDef).group(1)
+    try:
+        rgnName = re.search(r'[FLASH]+_REGION_(.+)_[A-Z]+', rgnDef).group(1)
+    except AttributeError:
+        return rgnDef
+    else:
+        return rgnName
 
 def setOutputHex(h):
     return h[0:2] + (h[2:].zfill(8)).upper()
