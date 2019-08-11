@@ -46,18 +46,18 @@ class MainGui:
         self.flashCanvas.create_window((0, 0), window=self.flashFrame, anchor='nw')
 
         # Listbox for each FD
-        self.fdListbox = tkinter.Listbox(self.rt, height=MAX_FD_NUM, width=20, selectmode=tkinter.BROWSE)
+        self.fdListbox = tkinter.Listbox(self.rt, height=MAX_FD_NUM, width=17, selectmode=tkinter.BROWSE)
         self.fdListbox.bind('<<ListboxSelect>>', self.onSelect)
 
         # Scrollbar of Flash Canvas frame
         self.scrollbarFlash = tkinter.Scrollbar(self.canvas, command=self.flashCanvas.yview)
 
         # Button of parsing file
-        self.prsBtn = tkinter.Button(self.rt, text='Parse', command=self.prsBtnCallback, height=3, width=10, state=tkinter.DISABLED, cursor='arrow')
+        self.prsBtn = tkinter.Button(self.rt, text='Parse', command=self.prsBtnCallback, height=3, width=7, state=tkinter.DISABLED, cursor='arrow')
 
         # Canvas of checkbutton
         self.cbCanvas = tkinter.Canvas(self.rt)
-        self.cbInCanvas = tkinter.Canvas(self.cbCanvas, height=50, width=205, relief='groove', bd=1)
+        self.cbInCanvas = tkinter.Canvas(self.cbCanvas, height=50, width=245, relief='groove', bd=1)
         self.cbFrame = tkinter.Frame(self.cbInCanvas)
         self.cbInCanvas.create_window((0, 0), window=self.cbFrame, anchor='nw')
 
@@ -72,8 +72,8 @@ class MainGui:
         self.rgnSizeLabel = tkinter.Label(self.rt, width=45, anchor='e')
 
         self.fdListbox.place(x=10, y=6)
-        self.cbCanvas.place(x=155, y=5)
-        self.prsBtn.place(x=390, y=5)
+        self.cbCanvas.place(x=135, y=5)
+        self.prsBtn.place(x=410, y=5)
         self.rgnSizeEntry.place(x=340, y=68)
         self.rgnSizeLabel.place(x=10, y=67)
         self.canvas.place(x=10, y=95)
@@ -250,7 +250,7 @@ class MainGui:
 
     def buildFlashMap(self):
         fdOffset, nulBlk, rgnLabel = 0, 0, None
-        labelHeight = None
+        labelHeight = 1
         fdDict = self.sortedfdDict
 
         for w in self.flashFrame.winfo_children():
