@@ -27,7 +27,7 @@ class MainGui:
 
         self.rt = rt
         self.cfgDict = cfgDict
-        self.loadCfgFile, self.switchSel = None, None
+        self.loadCfgFile, self.switchMod = None, None
         self.preSelRgnWidget, self.preSelRgnColor, self.preSelRgnBaseWidget, self.preSelRgnEndWidget = None, None, None, None
         self.curFd = None
 
@@ -187,11 +187,12 @@ class MainGui:
             w.destroy()
 
         for idx, switch in enumerate(self.switchInused):
-            self.cbDict.update({switch: tkinter.IntVar()})
-            cb = tkinter.Checkbutton(self.cbFrame, text=switch, variable=self.cbDict[switch], command=self.checkBtnCallback)
-            if self.switchInused[switch] == 'YES':
-                cb.select()
-            cb.grid(row=idx, column=0, sticky=tkinter.NW)
+            self.cbDict.update({switch: tkinter.StringVar()})
+            swLbl = tkinter.Label(self.cbFrame, text=switch)
+            swEntry = tkinter.Entry(self.cbFrame, text=switch, textvariable=self.cbDict[switch], width=13)
+            swEntry.bind('<Return>', self.checkBtnCallback)
+            swLbl.grid(row=idx, column=0, sticky=tkinter.NW)
+            swEntry.grid(row=idx, column=1, sticky=tkinter.NW)
         self.cbFrame.update_idletasks()
         self.cbInCanvas.configure(scrollregion=self.cbInCanvas.bbox('all'))
 
@@ -201,7 +202,7 @@ class MainGui:
                 self.cfgDict['Switch'].update({switch: 'YES'})
             else:
                 self.cfgDict['Switch'].update({switch: 'NO'})
-        self.switchSel = True
+        self.switchMod = True
         self.prsBtnCallback()
 
     def cr8FdListbox(self):
@@ -294,7 +295,7 @@ def main():
 
     root.mainloop()
 
-    if app.loadCfgFile or app.switchSel:
+    if app.loadCfgFile or app.switchMod:
         dictUpdateJson('config.json', app.cfgDict)
 
 if __name__ == '__main__':
