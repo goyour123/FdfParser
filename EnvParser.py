@@ -1,6 +1,10 @@
 import sys, os
-import re
+import re, json
 from warnings import warn
+
+def dict2JsonFile(jsonFilePath, srcDict):
+  with open(jsonFilePath, 'w') as j:
+    j.write(json.dumps(srcDict, indent = 4))
 
 def parseEnv(config_dict):
   defiDict = dict()
@@ -34,4 +38,5 @@ if __name__ == '__main__':
   else:
     pass
 
-  print(envDict)
+  if envDict:
+    dict2JsonFile('Env.json', envDict)
