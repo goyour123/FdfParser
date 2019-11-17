@@ -30,6 +30,7 @@ class MainGui:
         self.cfgDict = cfgDict
         self.preSelRgnWidget, self.preSelRgnColor, self.preSelRgnBaseWidget, self.preSelRgnEndWidget = None, None, None, None
         self.curFd = None
+        self.needUpdate = False
 
         # Menubar
         menubar = tkinter.Menu(self.rt)
@@ -154,17 +155,22 @@ class MainGui:
             initDir = os.path.dirname(self.cfgDict['Fdf'])
         else:
             initDir = os.getcwd()
-        loadCfgFile = tkinter.filedialog.askopenfile(title='Browse source path', initialdir=initDir, filetypes=[("Flash Description File", "*.fdf")])
+        loadCfgFile = tkinter.filedialog.askopenfile(title='Select FDF file to parse...', initialdir=initDir, filetypes=[("Flash Description File", "*.fdf")])
         if loadCfgFile:
             self.cfgDict.update({'Fdf': loadCfgFile.name})
             self.cfgDict.update({'Env': (loadCfgFile.name).split('.')[0] + '.env'})
-            self.cfgDict.update({'Switch': parseEnv(self.cfgDict)})
+            try:
+                self.cfgDict.update({'Switch': parseEnv(self.cfgDict)})
+            except FileNotFoundError:
+                loadEnvFile = tkinter.filedialog.askopenfile(title='Select environment variable file...', initialdir=initDir, filetypes=[("Environment Variable File", "*.env")])
+                self.cfgDict.update({'Env': loadEnvFile.name})
+                self.cfgDict.update({'Switch': parseEnv(self.cfgDict)})
             self.sortedfdDict, self.macroDict, self.cfgDict, self.switchInused, self.fdInfo = parse(self.cfgDict)
             self.cr8DynCheckbtn()
             self.cr8FdListbox()
             self.prsBtn.configure(state=tkinter.NORMAL, cursor='spider')
             self.fileMenu.entryconfigure(' Export ', state=tkinter.NORMAL)
-            self.loadCfgFile = loadCfgFile
+            self.needUpdate = True
 
     def exportCallback(self):
         if 'Fdf' in self.cfgDict:
@@ -272,8 +278,7 @@ class MainGui:
                 rgnLabel.bind('<Button-1>', self.rgnButtonCallback)
                 tkinter.Label(self.flashFrame, text=setDisplayHex(hex(rgnOffset)), height=labelHeight, width=9).grid(row=idx + nulBlk, column=1, rowspan=1, columnspan=1, sticky='w')
                 fdOffset = rgnOffset + rgnSize
-            if idx:
-                tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset)), height=labelHeight, width=9).grid(row=idx + nulBlk + 1, column=1, rowspan=1, columnspan=1, sticky='w')
+            tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset)), height=labelHeight, width=9).grid(row=idx + nulBlk + 1, column=1, rowspan=1, columnspan=1, sticky='w')
 
 def main():
     try:
@@ -295,7 +300,8 @@ def main():
 
     root.mainloop()
 
-    dictUpdateJson('config.json', app.cfgDict)
+    if app.needUpdate:
+        dictUpdateJson('config.json', app.cfgDict)
 
 if __name__ == '__main__':
     main()
