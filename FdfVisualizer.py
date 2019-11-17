@@ -3,6 +3,7 @@ import tkinter, tkinter.filedialog, tkinter.messagebox
 from warnings import warn
 from FdfParser import parse, get_value, dictUpdateJson, export, cnvRgnName
 from FdfRestorer import restore, hexFillZero
+from EnvParser import parseEnv
 
 MAX_FD_NUM = 3
 MIN_SIZE = '0x1000'
@@ -27,7 +28,6 @@ class MainGui:
 
         self.rt = rt
         self.cfgDict = cfgDict
-        self.loadCfgFile, self.switchMod = None, None
         self.preSelRgnWidget, self.preSelRgnColor, self.preSelRgnBaseWidget, self.preSelRgnEndWidget = None, None, None, None
         self.curFd = None
 
@@ -90,7 +90,7 @@ class MainGui:
         self.cbInCanvas.configure(yscrollcommand = self.scrollbarCb.set)
         self.cbInCanvas.bind('<Configure>', self.cbOnConfig)
 
-        if 'Fdf' in cfgDict:
+        if 'Fdf' in cfgDict and 'Env' in cfgDict:
             self.sortedfdDict, self.macroDict, self.cfgDict, self.switchInused, self.fdInfo = parse(self.cfgDict)
             self.cr8DynCheckbtn()
             self.cr8FdListbox()
@@ -142,7 +142,9 @@ class MainGui:
         self.rgnButtonCallback(e)
 
     def prsBtnCallback(self):
+        self.cfgDict.update({'Switch': parseEnv(self.cfgDict)})
         self.sortedfdDict, self.macroDict, self.cfgDict, self.switchInused, self.fdInfo = parse(self.cfgDict)
+        self.cr8DynCheckbtn()
         self.buildFlashMap()
         self.flashFrame.update_idletasks()
         self.flashCanvas.configure(scrollregion=self.flashCanvas.bbox('all'))
@@ -155,6 +157,8 @@ class MainGui:
         loadCfgFile = tkinter.filedialog.askopenfile(title='Browse source path', initialdir=initDir, filetypes=[("Flash Description File", "*.fdf")])
         if loadCfgFile:
             self.cfgDict.update({'Fdf': loadCfgFile.name})
+            self.cfgDict.update({'Env': (loadCfgFile.name).split('.')[0] + '.env'})
+            self.cfgDict.update({'Switch': parseEnv(self.cfgDict)})
             self.sortedfdDict, self.macroDict, self.cfgDict, self.switchInused, self.fdInfo = parse(self.cfgDict)
             self.cr8DynCheckbtn()
             self.cr8FdListbox()
@@ -189,21 +193,13 @@ class MainGui:
         for idx, switch in enumerate(self.switchInused):
             self.cbDict.update({switch: tkinter.StringVar()})
             swLbl = tkinter.Label(self.cbFrame, text=switch)
-            swEntry = tkinter.Entry(self.cbFrame, text=switch, textvariable=self.cbDict[switch], width=13)
-            swEntry.bind('<Return>', self.checkBtnCallback)
+            swEntry = tkinter.Entry(self.cbFrame, width=13)
             swLbl.grid(row=idx, column=0, sticky=tkinter.NW)
             swEntry.grid(row=idx, column=1, sticky=tkinter.NW)
+            swEntry.insert(0, self.cfgDict['Switch'][switch])
+            swEntry.configure(state='disable')
         self.cbFrame.update_idletasks()
         self.cbInCanvas.configure(scrollregion=self.cbInCanvas.bbox('all'))
-
-    def checkBtnCallback(self):
-        for switch in self.cbDict:
-            if self.cbDict[switch].get() == 1:
-                self.cfgDict['Switch'].update({switch: 'YES'})
-            else:
-                self.cfgDict['Switch'].update({switch: 'NO'})
-        self.switchMod = True
-        self.prsBtnCallback()
 
     def cr8FdListbox(self):
         self.fdListbox.delete(0, 'end')
@@ -262,6 +258,7 @@ class MainGui:
             w.destroy()
 
         if fdDict:
+            idx = 0
             for idx, rgn in enumerate(fdDict[self.curFd]):
                 rgnOffset, rgnSize = get_value(rgn[0], self.macroDict), get_value(rgn[1], self.macroDict)
                 if fdOffset < rgnOffset:
@@ -275,14 +272,17 @@ class MainGui:
                 rgnLabel.bind('<Button-1>', self.rgnButtonCallback)
                 tkinter.Label(self.flashFrame, text=setDisplayHex(hex(rgnOffset)), height=labelHeight, width=9).grid(row=idx + nulBlk, column=1, rowspan=1, columnspan=1, sticky='w')
                 fdOffset = rgnOffset + rgnSize
-            tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset)), height=labelHeight, width=9).grid(row=idx + nulBlk + 1, column=1, rowspan=1, columnspan=1, sticky='w')
+            if idx:
+                tkinter.Label(self.flashFrame, text=setDisplayHex(hex(fdOffset)), height=labelHeight, width=9).grid(row=idx + nulBlk + 1, column=1, rowspan=1, columnspan=1, sticky='w')
 
 def main():
     try:
         with open('config.json', 'r') as f:
             cfgDict = json.load(f)
-            if not os.path.isfile(cfgDict['Fdf']):
+            if not os.path.isfile(cfgDict['Fdf']) and not os.path.isfile(cfgDict['Env']):
                 cfgDict = {}
+            else:
+                cfgDict.update({'Switch': parseEnv(cfgDict)})
     except:
         cfgDict = {}
 
@@ -295,8 +295,7 @@ def main():
 
     root.mainloop()
 
-    if app.loadCfgFile or app.switchMod:
-        dictUpdateJson('config.json', app.cfgDict)
+    dictUpdateJson('config.json', app.cfgDict)
 
 if __name__ == '__main__':
     main()

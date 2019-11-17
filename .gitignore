@@ -11,3 +11,4 @@ config.json
 # User-specific files
 *.bat
 *.fdf
+*.env

@@ -1,6 +1,7 @@
 import sys, os
 import re, json
 from warnings import warn
+from EnvParser import parseEnv
 
 def get_cond(oprda, oprdb, optr):
     if optr == '==':
@@ -265,34 +266,19 @@ def parse(config_dict):
     return sorted_fd_info, macro_dict, config_dict, switch_inused, fd_info
 
 if __name__ == '__main__':
-    try:
-        sys.argv[1]
-    except IndexError:
-        if os.path.isfile('config.json'):
-            with open('config.json', 'r') as config_f:
-                config_dict = json.load(config_f)
-                try:
-                    config_dict['Fdf']
-                except KeyError:
-                    sys.exit()
-                else:
-                    if not os.path.isfile(config_dict['Fdf']):
-                        sys.exit()
-        else:
-            sys.exit()
+    arg_names = ['script', 'fdf_file', 'env_file']
+    args = dict(zip(arg_names, sys.argv))
+
+    if len(args) < 3:
+        warn('Too few arguments')
     else:
-        if os.path.isfile('config.json'):
-            if os.path.isfile(sys.argv[1]):
-                with open('config.json', 'r') as config_f:
-                    config_dict = json.load(config_f)
-                    config_dict.update({'Fdf': os.path.abspath(sys.argv[1])})
-            else:
-                sys.exit()
+        if os.path.isfile(args['fdf_file']) and os.path.isfile(args['env_file']):
+            config_dict = {'Fdf': os.path.abspath(args['fdf_file']), \
+                           'Env': os.path.abspath(args['env_file'])}
+            config_dict.update({'Switch': parseEnv(config_dict)})
         else:
-            if os.path.isfile(sys.argv[1]):
-                config_dict = {'Fdf': os.path.abspath(sys.argv[1])}
-            else:
-                sys.exit()
+            warn('Invalid arguments')
+            sys.exit()
 
     sorted_fd_dict, macro_dict, config_dict, switch_inused, fd_info = parse(config_dict)
 
