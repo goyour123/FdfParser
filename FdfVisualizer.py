@@ -158,7 +158,7 @@ class MainGui:
         loadCfgFile = tkinter.filedialog.askopenfile(title='Select FDF file to parse...', initialdir=initDir, filetypes=[("Flash Description File", "*.fdf")])
         if loadCfgFile:
             self.cfgDict.update({'Fdf': loadCfgFile.name})
-            self.cfgDict.update({'Env': (loadCfgFile.name).split('.')[0] + '.env'})
+            self.cfgDict.update({'Env': os.path.splitext(loadCfgFile.name)[0] + '.env'})
             try:
                 self.cfgDict.update({'Switch': parseEnv(self.cfgDict)})
             except FileNotFoundError:
