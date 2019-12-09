@@ -271,6 +271,7 @@ if __name__ == '__main__':
 
     if len(args) < 3:
         warn('Too few arguments')
+        sys.exit()
     else:
         if os.path.isfile(args['fdf_file']) and os.path.isfile(args['env_file']):
             config_dict = {'Fdf': os.path.abspath(args['fdf_file']), \
