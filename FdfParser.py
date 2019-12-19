@@ -211,7 +211,7 @@ def parse(config_dict):
                                 config_dict.update({'Switch': {oprda: 'NO'}})
                             else:
                                 config_dict['Switch'][oprda] = 'NO'
-                        cond_nest.append(get_cond(get_macro_value(oprda, config_dict['Switch']), oprdb, '=='))
+                        cond_nest[-1] = get_cond(get_macro_value(oprda, config_dict['Switch']), oprdb, '==')
                         switch_inused.update({oprda: config_dict['Switch'][oprda]})
                     elif len(elif_stat_pcd) > 0:
                         # Collect PCDs
@@ -221,10 +221,10 @@ def parse(config_dict):
                         except KeyError:
                             pcd_dict[oprda] = False
                         # No parsing for PCD switch
-                        cond_nest.append(False)
+                        cond_nest[-1] = False
                     else:
                         # No parsing for unknown case
-                        cond_nest.append(False)
+                        cond_nest[-1] = False
 
                 elif statement[0] == 'endif':
                     cond_nest.pop(-1)
