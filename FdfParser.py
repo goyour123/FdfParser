@@ -134,6 +134,16 @@ def parse(config_dict):
     fd_info, fd_list, fd_count, sorted_fd_info = {}, [], 0, {}
     macro_dict, switch_inused, pcd_dict, pending_lines = {}, {}, {}, []
 
+    # Init macro_dict from config_dict
+    for cfg in config_dict['Switch']:
+        print(config_dict['Switch'][cfg])
+        try:
+            int(config_dict['Switch'][cfg], base=16)
+        except:
+            pass
+        else:
+            macro_dict.update({cfg: config_dict['Switch'][cfg]})
+
     with open(config_dict['Fdf'], 'r') as f:
 
         cond_nest = []
