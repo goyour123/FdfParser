@@ -31,6 +31,7 @@ def get_macro_value(macro, macro_dict):
         try:
             int(macro, 16)
         except:
+            warn(macro + ' not found in macro_dict')
             val = None
         else:
             val = macro
@@ -136,7 +137,6 @@ def parse(config_dict):
 
     # Init macro_dict from config_dict
     for cfg in config_dict['Switch']:
-        print(config_dict['Switch'][cfg])
         try:
             int(config_dict['Switch'][cfg], base=16)
         except:
