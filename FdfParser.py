@@ -106,10 +106,13 @@ def charPrinter(char, text, length):
     backDashNum = length - round(length/2) - (len(text) - round(len(text)/2))
     return char * frontDashNum + text + char * backDashNum
 
-def export(export_file_path, fdf_file_path, fd_dict, macro_dict):
+def export(export_file_path, cfg_dict, fd_dict, macro_dict):
     width = 61
     with open(export_file_path, 'w') as f:
-        f.writelines('----------------\nParsed File Path: ' + fdf_file_path + '\n----------------\n\n')
+        f.writelines('Parsed File Path:\n')
+        f.writelines(cfg_dict['Fdf'] + '\n')
+        f.writelines(cfg_dict['Env'] + '\n')
+        f.writelines('\n')
         for fd in fd_dict:
             pre_offset = None
             f.writelines('[FD.' + fd + ']\n')
@@ -303,4 +306,4 @@ if __name__ == '__main__':
     dictUpdateJson('config.json', config_dict)
 
     # Export Region file
-    export('region.txt', config_dict['Fdf'], sorted_fd_dict, macro_dict)
+    export('region.txt', config_dict, sorted_fd_dict, macro_dict)

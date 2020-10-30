@@ -178,7 +178,7 @@ class MainGui:
         else:
             initDir = os.getcwd()
         exportFile = tkinter.filedialog.asksaveasfile(defaultextension='.txt', title='Export to', initialdir=initDir, filetypes=[("Text Document", "*.txt")])
-        export(exportFile.name, self.cfgDict['Fdf'], self.sortedfdDict, self.macroDict)
+        export(exportFile.name, self.cfgDict, self.sortedfdDict, self.macroDict)
 
     def onSelect(self, evt):
         sel = self.fdListbox.curselection()
@@ -297,7 +297,8 @@ def main():
     root.iconbitmap(r'.\img\trilobite.ico')
     root.title('FdVisualizer')
     root.geometry("515x590+450+40")
-
+    if 'Fdf'not in app.cfgDict or 'Env'not in app.cfgDict:
+        app.browser()
     root.mainloop()
 
     if app.needUpdate:
