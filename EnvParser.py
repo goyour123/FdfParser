@@ -26,10 +26,18 @@ def parseEnv(config_dict):
         defiDict.update({defi2[0][0]: defi2[0][1]})
   return defiDict
 
-def parsePcdList():
-  pass
+def parsePcdList(config_dict):
+  defiDict = dict()
+  with open(config_dict['PcdList'], 'r') as f:
+    for line in f:
+      defi = re.findall(r'(\S+\.\S+):\s(.+)', line)
+      if defi:
+        defiDict.update({defi[0][0]: defi[0][1]})
+  return defiDict
 
 if __name__ == '__main__':
+
+  valDict = dict()
 
   parser = argparse.ArgumentParser()
   parser.add_argument("-e", "--EnvVarFile", type=lambda p: str(os.path.abspath(p)), help="Environment variable file")
@@ -39,17 +47,19 @@ if __name__ == '__main__':
 
   if args.EnvVarFile:
     if os.path.isfile(args.EnvVarFile):
-      envDict = parseEnv({'Env': args.EnvVarFile})
+      valDict.update({"Env": args.EnvVarFile})
+      valDict.update(parseEnv(valDict))
     else:
       warn('--EnvVarFile is not a file path')
       sys.exit()
 
   if args.PcdFile:
     if os.path.isfile(args.PcdFile):
-      envDict = parsePcdList({'PcdList': args.PcdFile})
+      valDict.update({"PcdList": args.PcdFile})
+      valDict.update(parsePcdList(valDict))
     else:
       warn('--PcdFile is not a file path')
       sys.exit()
 
-  if envDict:
-    dict2JsonFile('Env.json', envDict)
+  if valDict:
+    dict2JsonFile('Val.json', valDict)
