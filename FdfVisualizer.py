@@ -162,7 +162,8 @@ class MainGui:
             try:
                 self.cfgDict.update({'Switch': parseEnv(self.cfgDict)})
             except FileNotFoundError:
-                loadEnvFile = tkinter.filedialog.askopenfile(title='Select environment variable file...', initialdir=initDir, filetypes=[("Environment Variable File", "*.env")])
+                loadEnvFile = tkinter.filedialog.askopenfile(title='Select environment variable file...', initialdir=initDir, \
+                    filetypes=[("Build Configuration File", "*.ini"), ("Environment Variable File", "*.env")])
                 self.cfgDict.update({'Env': loadEnvFile.name})
                 self.cfgDict.update({'Switch': parseEnv(self.cfgDict)})
             self.sortedfdDict, self.macroDict, self.cfgDict, self.switchInused, self.fdInfo = parse(self.cfgDict)
