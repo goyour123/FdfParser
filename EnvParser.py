@@ -1,11 +1,21 @@
 import sys, os
 import re, json
 import argparse
+import configparser
 from warnings import warn
 
 def dict2JsonFile(jsonFilePath, srcDict):
   with open(jsonFilePath, 'w') as j:
     j.write(json.dumps(srcDict, indent = 4))
+
+def parseIni(config_dict):
+  config = configparser.ConfigParser(strict=False)
+  config.optionxform = lambda option: option
+  config.read(config_dict['Ini'])
+  for sect in config.sections():
+    for key in config[sect]:
+      config_dict.update({key: config[sect][key]})
+  return config_dict
 
 def parseEnv(config_dict):
   defiDict = dict()
@@ -42,6 +52,7 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument("-e", "--EnvVarFile", type=lambda p: str(os.path.abspath(p)), help="Environment variable file")
   parser.add_argument("-p", "--PcdFile", type=lambda p: str(os.path.abspath(p)), help="PCD value file")
+  parser.add_argument("-i", "--IniFile", type=lambda p: str(os.path.abspath(p)), help="Ini file")
 
   args = parser.parse_args()
 
@@ -59,6 +70,14 @@ if __name__ == '__main__':
       valDict.update(parsePcdList(valDict))
     else:
       warn('--PcdFile is not a file path')
+      sys.exit()
+
+  if args.IniFile:
+    if os.path.isfile(args.IniFile):
+      valDict.update({"Ini": args.IniFile})
+      valDict.update(parseIni(valDict))
+    else:
+      warn('--IniFile is not a file path')
       sys.exit()
 
   if valDict:
