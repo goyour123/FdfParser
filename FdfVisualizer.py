@@ -3,7 +3,7 @@ import tkinter, tkinter.filedialog, tkinter.messagebox
 from warnings import warn
 from FdfParser import parse, get_value, dictUpdateJson, export, cnvRgnName
 from FdfRestorer import restore, hexFillZero
-from EnvParser import parseEnv
+from EnvParser import parseEnv, parseIni
 
 MAX_FD_NUM = 3
 MIN_SIZE = '0x1000'
@@ -164,8 +164,13 @@ class MainGui:
             except FileNotFoundError:
                 loadEnvFile = tkinter.filedialog.askopenfile(title='Select environment variable file...', initialdir=initDir, \
                     filetypes=[("Build Configuration File", "*.ini"), ("Environment Variable File", "*.env")])
-                self.cfgDict.update({'Env': loadEnvFile.name})
-                self.cfgDict.update({'Switch': parseEnv(self.cfgDict)})
+                _fn, ext = os.path.splitext(loadEnvFile.name)
+                if ext == '.ini':
+                    self.cfgDict.update({'Ini': loadEnvFile.name})
+                    self.cfgDict.update({'Switch': parseIni(self.cfgDict)})
+                else:
+                    self.cfgDict.update({'Env': loadEnvFile.name})
+                    self.cfgDict.update({'Switch': parseEnv(self.cfgDict)})
             self.sortedfdDict, self.macroDict, self.cfgDict, self.switchInused, self.fdInfo = parse(self.cfgDict)
             self.cr8DynCheckbtn()
             self.cr8FdListbox()
