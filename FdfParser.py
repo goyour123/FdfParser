@@ -15,12 +15,7 @@ def extract_var(string):
     if len(var) > 0:
         return var[0]
     else:
-        try:
-            int(string, 16)
-        except:
-            return None
-        else:
-            return string
+        return string
 
 def get_macro_value(macro, macro_dict):
     try:
@@ -50,15 +45,15 @@ def get_value(var, macro_dict):
         return int(var, base=16)
 
 def update_macro_dict(key, line, macro_dict):
-    oprd = re.findall(r'\s*[\+\-\*/=]\s*([^\+\-\*\/\n\s#]+)', line)
-    operator = re.findall(r'([\+\-\*/])', line)
+    oprd = re.findall(r'\s*[\+\-\*=]\s*([^\+\-\*\n\s#]+)', line)
+    operator = re.findall(r'([\+\-\*])', line)
 
     # Set the first operand as the initial result value
     if type(get_value(oprd[0], macro_dict)) != type(None):
         result = get_value(oprd[0], macro_dict)
     elif len(operator) == 0 and len(oprd) > 0:
         macro_dict[key] = oprd[0]
-        return macro_dict, None
+        return macro_dict, line
     else:
         return macro_dict, line
 
@@ -72,8 +67,6 @@ def update_macro_dict(key, line, macro_dict):
                     result -= val
                 elif (optr == '*'):
                     result *= val
-                elif (optr == '/'):
-                    result /= val
             else:
                 return macro_dict, line
 
@@ -256,16 +249,20 @@ def parse(config_dict):
                     continue
 
             macro = re.findall(r'\s*DEFINE\s+([^\s=]+)', line)
-            if len(macro) > 0:
+            set_pcd = re.findall(r'\s*SET\s+([^\s=]+)', line)
+            if len(macro) > 0 or len(set_pcd) > 0:
                 # Collect MACROs into a dict
-                macro_dict, pending = update_macro_dict(macro[0], line, macro_dict)
+                m = macro[0] if len(macro) > 0 else set_pcd[0]
+                macro_dict, pending = update_macro_dict(m, line, macro_dict)
                 if pending:
                     pending_lines.append(pending)
                 elif pending_lines:
                     temp_pl_list = []
                     for pl in pending_lines:
                         pl_macro = re.findall(r'\s*DEFINE\s+([^\s=]+)', pl)
-                        macro_dict, pending = update_macro_dict(pl_macro[0], pl, macro_dict)
+                        pl_pcd = re.findall(r'\s*SET\s+([^\s=]+)', pl)
+                        pm = pl_macro[0] if len(pl_macro) > 0 else pl_pcd[0]
+                        macro_dict, pending = update_macro_dict(pm, pl, macro_dict)
                         if pending:
                             temp_pl_list.append(pl)
                     pending_lines = temp_pl_list
