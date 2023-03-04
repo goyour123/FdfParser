@@ -128,22 +128,11 @@ def export(export_file_path, cfg_dict, fd_dict, macro_dict):
                     f.writelines('# |' + charPrinter('-', '', width) + '| ' + setOutputHex(get_macro_value(offset_macro, macro_dict)) + '\n')
             f.writelines('\n')
 
-def parse(config_dict):
+def parse_fdf(fdf_path, config_dict, macro_dict, switch_inused):
+    fd_info, fd_list, fd_count = {}, [], 0
+    pcd_dict, pending_lines = {}, []
 
-    fd_info, fd_list, fd_count, sorted_fd_info = {}, [], 0, {}
-    macro_dict, switch_inused, pcd_dict, pending_lines = {}, {}, {}, []
-
-    # Init macro_dict from config_dict
-    for cfg in config_dict['Switch']:
-        try:
-            int(config_dict['Switch'][cfg], base=16)
-        except:
-            pass
-        else:
-            macro_dict.update({cfg: config_dict['Switch'][cfg]})
-
-    with open(config_dict['Fdf'], 'r') as f:
-
+    with open(fdf_path, 'r') as f:
         cond_nest = []
         fd_cond, ign_cond = False, True
 
@@ -237,6 +226,12 @@ def parse(config_dict):
 
                 elif statement[0] == 'endif':
                     cond_nest.pop(-1)
+
+                elif statement[0] == 'include':
+                    include_stat = re.findall('\s*!include\s+(\S+)\s*', line)
+                    if len(include_stat) > 0:
+                        if '.dsc' in include_stat[0]:
+                            continue
                 continue
 
             # Skip parsing if the condition is not match
@@ -267,6 +262,25 @@ def parse(config_dict):
                         if pending:
                             temp_pl_list.append(pl)
                     pending_lines = temp_pl_list
+
+    return config_dict, macro_dict, switch_inused, fd_info
+
+def parse(config_dict):
+
+    fd_info, sorted_fd_info = {}, {}
+    macro_dict, switch_inused= {}, {}
+
+    # Init macro_dict from config_dict
+    for cfg in config_dict['Switch']:
+        try:
+            int(config_dict['Switch'][cfg], base=16)
+        except:
+            pass
+        else:
+            macro_dict.update({cfg: config_dict['Switch'][cfg]})
+
+    fdf_path = config_dict['Fdf']
+    config_dict, macro_dict, switch_inused, fd_info = parse_fdf(fdf_path, config_dict, macro_dict, switch_inused)
 
     # Sorting the region in fd_info
     if macro_dict:

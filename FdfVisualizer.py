@@ -9,14 +9,6 @@ MAX_FD_NUM = 3
 MIN_SIZE = '0x1000'
 MAX_SIZE = '0x1000000'
 
-def getJsnKey(jsnPath, key):
-    try:
-        with open(cfgPath, 'r') as f:
-            cfgDict = json.load(f)
-            return cfgDict[key]
-    except:
-        return None
-
 def setDisplayHex(h):
     return h[0:2] + ((h[2:].zfill(7))[0:3] + '_' + (h[2:].zfill(7))[3:7]).upper()
 
