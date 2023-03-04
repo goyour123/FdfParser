@@ -128,6 +128,15 @@ def export(export_file_path, cfg_dict, fd_dict, macro_dict):
                     f.writelines('# |' + charPrinter('-', '', width) + '| ' + setOutputHex(get_macro_value(offset_macro, macro_dict)) + '\n')
             f.writelines('\n')
 
+def macro_expander(path, macro_dict, config_dict):
+    macros = re.findall(r'\$\((\S+?)\)', path)
+    if len(macros) > 0:
+        for m in macros:
+            value = get_macro_value(m, macro_dict) if get_macro_value(m, macro_dict) else get_macro_value(m, config_dict['Switch'])
+            if value:
+                path = macro_expander(path.replace('$(' + m + ')', value), macro_dict, config_dict)
+    return path
+
 def parse_fdf(fdf_path, config_dict, macro_dict, switch_inused):
     fd_info, fd_list, fd_count = {}, [], 0
     pcd_dict, pending_lines = {}, []
@@ -232,6 +241,7 @@ def parse_fdf(fdf_path, config_dict, macro_dict, switch_inused):
                     if len(include_stat) > 0:
                         if '.dsc' in include_stat[0]:
                             continue
+                        include_fdf_path = macro_expander(include_stat[0], macro_dict, config_dict)
                 continue
 
             # Skip parsing if the condition is not match
