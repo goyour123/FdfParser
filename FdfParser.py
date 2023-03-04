@@ -188,6 +188,7 @@ def parse(config_dict):
                                 config_dict.update({'Switch': {oprda: 'NO'}})
                             else:
                                 config_dict['Switch'][oprda] = 'NO'
+                        oprdb = oprdb.strip('"')
                         cond_nest.append(get_cond(get_macro_value(oprda, config_dict['Switch']), oprdb, '=='))
                         switch_inused.update({oprda: config_dict['Switch'][oprda]})
                     elif len(if_stat_pcd) > 0:
@@ -243,7 +244,7 @@ def parse(config_dict):
                 continue
 
             if fd_cond > 0:
-                region = re.findall(r'([\$0].+)\|([\$0].+)', line)
+                region = re.findall(r'(\S+)\|(\S+)', line)
                 if len(region) > 0:
                     fd_info[fd_list[fd_count-1]].append(region[0])
                     continue
