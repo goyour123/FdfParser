@@ -9,13 +9,14 @@ def dict2JsonFile(jsonFilePath, srcDict):
     j.write(json.dumps(srcDict, indent = 4))
 
 def parseIni(config_dict):
+  defidict = dict()
   config = configparser.ConfigParser(strict=False)
   config.optionxform = lambda option: option
-  config.read(config_dict['Ini'])
+  config.read(config_dict['Env'])
   for sect in config.sections():
     for key in config[sect]:
-      config_dict.update({key: config[sect][key]})
-  return config_dict
+      defidict.update({key: config[sect][key]})
+  return defidict
 
 def parseEnv(config_dict):
   defiDict = dict()

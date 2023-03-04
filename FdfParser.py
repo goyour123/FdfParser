@@ -31,7 +31,6 @@ def get_macro_value(macro, macro_dict):
         try:
             int(macro, 16)
         except:
-            warn(macro + ' not found in macro_dict')
             val = None
         else:
             val = macro
@@ -57,6 +56,9 @@ def update_macro_dict(key, line, macro_dict):
     # Set the first operand as the initial result value
     if type(get_value(oprd[0], macro_dict)) != type(None):
         result = get_value(oprd[0], macro_dict)
+    elif len(operator) == 0 and len(oprd) > 0:
+        macro_dict[key] = oprd[0]
+        return macro_dict, None
     else:
         return macro_dict, line
 

@@ -159,17 +159,17 @@ class MainGui:
         if loadCfgFile:
             self.cfgDict.update({'Fdf': loadCfgFile.name})
             self.cfgDict.update({'Env': os.path.splitext(loadCfgFile.name)[0] + '.env'})
+            initDir = os.path.dirname(loadCfgFile.name)
             try:
                 self.cfgDict.update({'Switch': parseEnv(self.cfgDict)})
             except FileNotFoundError:
                 loadEnvFile = tkinter.filedialog.askopenfile(title='Select environment variable file...', initialdir=initDir, \
                     filetypes=[("Build Configuration File", "*.ini"), ("Environment Variable File", "*.env")])
                 _fn, ext = os.path.splitext(loadEnvFile.name)
+                self.cfgDict.update({'Env': loadEnvFile.name})
                 if ext == '.ini':
-                    self.cfgDict.update({'Ini': loadEnvFile.name})
                     self.cfgDict.update({'Switch': parseIni(self.cfgDict)})
                 else:
-                    self.cfgDict.update({'Env': loadEnvFile.name})
                     self.cfgDict.update({'Switch': parseEnv(self.cfgDict)})
             self.sortedfdDict, self.macroDict, self.cfgDict, self.switchInused, self.fdInfo = parse(self.cfgDict)
             self.cr8DynCheckbtn()
@@ -293,7 +293,11 @@ def main():
             if not os.path.isfile(cfgDict['Fdf']) and not os.path.isfile(cfgDict['Env']):
                 cfgDict = {}
             else:
-                cfgDict.update({'Switch': parseEnv(cfgDict)})
+                _fn, ext = os.path.splitext(cfgDict['Env'])
+                if ext == '.ini':
+                    cfgDict.update({'Switch': parseIni(cfgDict)})
+                else:
+                    cfgDict.update({'Switch': parseEnv(cfgDict)})
     except:
         cfgDict = {}
 
@@ -303,7 +307,7 @@ def main():
     root.iconbitmap(r'.\img\trilobite.ico')
     root.title('FdVisualizer')
     root.geometry("515x590+450+40")
-    if 'Fdf'not in app.cfgDict or 'Env'not in app.cfgDict:
+    if 'Fdf' not in app.cfgDict or 'Env' not in app.cfgDict:
         app.browser()
     root.mainloop()
 
