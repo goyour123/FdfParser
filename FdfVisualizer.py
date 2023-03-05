@@ -152,6 +152,7 @@ class MainGui:
             self.cfgDict.update({'Fdf': loadCfgFile.name})
             self.cfgDict.update({'Env': os.path.splitext(loadCfgFile.name)[0] + '.env'})
             initDir = os.path.dirname(loadCfgFile.name)
+            self.cfgDict['Workspace'] = os.path.dirname(initDir)
             try:
                 self.cfgDict.update({'Switch': parseEnv(self.cfgDict)})
             except FileNotFoundError:

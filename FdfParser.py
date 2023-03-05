@@ -137,8 +137,8 @@ def macro_expander(path, macro_dict, config_dict):
                 path = macro_expander(path.replace('$(' + m + ')', value), macro_dict, config_dict)
     return path
 
-def parse_fdf(fdf_path, config_dict, macro_dict, switch_inused):
-    fd_info, fd_list, fd_count = {}, [], 0
+def parse_fdf(fdf_path, config_dict, macro_dict, switch_inused, fd_info):
+    fd_list, fd_count = [], 0
     pcd_dict, pending_lines = {}, []
 
     with open(fdf_path, 'r') as f:
@@ -241,7 +241,8 @@ def parse_fdf(fdf_path, config_dict, macro_dict, switch_inused):
                     if len(include_stat) > 0:
                         if '.dsc' in include_stat[0]:
                             continue
-                        include_fdf_path = macro_expander(include_stat[0], macro_dict, config_dict)
+                        include_fdf_path = os.path.join(config_dict['Workspace'], macro_expander(include_stat[0], macro_dict, config_dict))
+                        config_dict, macro_dict, switch_inused, fd_info = parse_fdf(include_fdf_path, config_dict, macro_dict, switch_inused, fd_info)
                 continue
 
             # Skip parsing if the condition is not match
@@ -290,7 +291,7 @@ def parse(config_dict):
             macro_dict.update({cfg: config_dict['Switch'][cfg]})
 
     fdf_path = config_dict['Fdf']
-    config_dict, macro_dict, switch_inused, fd_info = parse_fdf(fdf_path, config_dict, macro_dict, switch_inused)
+    config_dict, macro_dict, switch_inused, fd_info = parse_fdf(fdf_path, config_dict, macro_dict, switch_inused, fd_info)
 
     # Sorting the region in fd_info
     if macro_dict:
